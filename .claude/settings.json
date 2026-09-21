@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit*)",
+      "Bash(npx eslint *)",
+      "Bash(vercel ls*)",
+      "Bash(vercel inspect *)",
+      "mcp__Claude_Browser__navigate",
+      "mcp__Claude_Browser__resize_window",
+      "mcp__Claude_Browser__read_console_messages",
+      "mcp__Claude_Browser__find",
+      "mcp__Claude_Browser__read_page",
+      "mcp__Claude_Browser__get_page_text",
+      "mcp__Claude_Browser__preview_start",
+      "mcp__Claude_Browser__preview_stop",
+      "mcp__Claude_Browser__preview_logs",
+      "mcp__Claude_Browser__preview_list",
+      "mcp__Claude_Browser__tabs_close",
+      "mcp__Claude_Browser__tabs_create",
+      "mcp__Claude_Browser__tabs_select",
+      "mcp__Claude_Browser__tabs_context",
+      "mcp__Claude_Browser__form_input",
+      "mcp__Claude_Browser__read_network_requests",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__0ca04c8e-bc39-405b-89e6-6f0b77c56266__jobs_wait",
+      "mcp__0ca04c8e-bc39-405b-89e6-6f0b77c56266__balance",
+      "mcp__0ca04c8e-bc39-405b-89e6-6f0b77c56266__models_explore",
+      "mcp__c5d831cb-e4a8-4093-a29b-a654fe2e99ce__get_workflow_details",
+      "mcp__c5d831cb-e4a8-4093-a29b-a654fe2e99ce__search_workflow_executions",
+      "mcp__ccd_session__mark_chapter"
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/**
+ * Puente entre brand.config.ts y Tailwind.
+ *
+ * Las variables `--brand-*` las inyecta el layout raíz a partir de
+ * brand.config.ts (ver src/lib/brand-css.ts). Aquí solo se mapea el namespace
+ * de Tailwind a esas variables — no hay ni un valor hardcodeado.
+ *
+ * Para cambiar la paleta: edita COLORS en src/config/brand.config.ts.
+ */
+@theme inline {
+  /* Superficies */
+  --color-bg: var(--brand-bg);
+  --color-bg-alt: var(--brand-bg-alt);
+  --color-surface: var(--brand-surface);
+  --color-surface-hover: var(--brand-surface-hover);
+
+  /* Bordes */
+  --color-border: var(--brand-border);
+  --color-border-strong: var(--brand-border-strong);
+
+  /* Acento */
+  --color-accent: var(--brand-accent);
+  --color-accent-hover: var(--brand-accent-hover);
+  --color-accent-soft: var(--brand-accent-soft);
+
+  /* Texto */
+  --color-text: var(--brand-text);
+  --color-text-muted: var(--brand-text-muted);
+  --color-text-faint: var(--brand-text-faint);
+
+  /* Estado */
+  --color-success: var(--brand-success);
+  --color-warning: var(--brand-warning);
+  --color-error: var(--brand-error);
+  --color-on-accent: var(--brand-on-accent);
+
+  /* Promoción */
+  --color-discount: var(--brand-discount);
+  --color-on-discount: var(--brand-on-discount);
+
+  /* Animación de intro */
+  --color-grime: var(--brand-grime);
+
+  /* Forma — lenguaje redondeado, nada de esquinas duras */
+  --radius-sm: var(--brand-radius-sm);
+  --radius-md: var(--brand-radius-md);
+  --radius-lg: var(--brand-radius-lg);
+  --radius-pill: var(--brand-radius-pill);
+
+  /* Escala tipográfica */
+  --text-display: var(--brand-size-display);
+  --text-h1: var(--brand-size-h1);
+  --text-h2: var(--brand-size-h2);
+  --text-h3: var(--brand-size-h3);
+  --text-body: var(--brand-size-body);
+  --text-small: var(--brand-size-small);
+  --text-tiny: var(--brand-size-tiny);
+
+  /* Pesos */
+  --font-weight-regular: var(--brand-weight-regular);
+  --font-weight-medium: var(--brand-weight-medium);
+  --font-weight-semibold: var(--brand-weight-semibold);
+  --font-weight-bold: var(--brand-weight-bold);
+  --font-weight-black: var(--brand-weight-black);
+
+  /* Tipografía */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: var(--font-sans);
+  /* El configurador se usa sobre todo desde el móvil: sin flash gris al tocar
+     las tarjetas, y sin rebote horizontal. */
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* Foco visible y consistente para navegación por teclado. */
+:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+  border-radius: var(--brand-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

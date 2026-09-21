@@ -1,0 +1,368 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "pricing": "Precios",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "policies": "Políticas",
+    "book": "Reservar",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "language": "Idioma"
+  },
+
+  "home": {
+    "heroTitle": "Limpieza profesional, precio claro desde el primer clic",
+    "heroSubtitle": "Cotiza y reserva en menos de dos minutos desde el teléfono. Sin llamadas, sin visitas previas, sin sorpresas en la factura.",
+    "ctaPrimary": "Cotizar y reservar",
+    "ctaSecondary": "Ver servicios",
+    "discountBadge": "20% de descuento",
+    "discountBadgeShort": "-20%",
+    "introDirtyMessage": "Tu pantalla está sucia",
+    "trustTitle": "Por qué reservar con nosotros",
+    "trust": {
+      "priceTitle": "Precio cerrado por adelantado",
+      "priceBody": "El estimado que ves al reservar es el que pagas. Nada de tarifas escondidas.",
+      "bookingTitle": "Reserva en dos minutos",
+      "bookingBody": "Eliges servicio, tamaño y horario. Confirmamos al instante.",
+      "insuredTitle": "Equipo asegurado",
+      "insuredBody": "Personal verificado y cubierto por seguro de responsabilidad."
+    },
+    "servicesTitle": "Qué limpiamos",
+    "servicesLink": "Ver todos los servicios",
+    "howTitle": "Cómo funciona",
+    "how": {
+      "step1Title": "Cotiza",
+      "step1Body": "Responde unas preguntas y ve tu precio en vivo.",
+      "step2Title": "Agenda",
+      "step2Body": "Eliges el día y la hora que te sirven.",
+      "step3Title": "Listo",
+      "step3Body": "Llegamos con todo. Tú no tienes que preparar nada."
+    },
+    "finalCtaTitle": "¿Listo para tener la casa limpia?",
+    "finalCtaBody": "Obtén tu precio ahora. No necesitas tarjeta para ver el estimado.",
+    "finalCtaButton": "Empezar"
+  },
+
+  "services": {
+    "title": "Servicios",
+    "intro": "Cinco tipos de limpieza, cada uno cotizado con sus propias reglas. Elige el que necesitas y obtén el precio al instante.",
+    "cta": "Cotizar este servicio",
+    "items": {
+      "residencial": {
+        "name": "Limpieza residencial",
+        "short": "Casas y apartamentos",
+        "description": "Limpieza regular o profunda de tu vivienda. Puedes elegir el nivel y agregar servicios extra como refrigerador, horno u organización."
+      },
+      "airbnb": {
+        "name": "Airbnb / Rotación",
+        "short": "Entre huéspedes",
+        "description": "Rotación rápida entre reservas: cambio de sábanas, reposición de amenities y dejado listo para el próximo check-in."
+      },
+      "mudanza": {
+        "name": "Mudanza (entrada / salida)",
+        "short": "Al mudarte",
+        "description": "Limpieza profunda de una propiedad vacía. Pensada para recuperar el depósito o recibir una casa impecable."
+      },
+      "comercial": {
+        "name": "Comercial",
+        "short": "Oficinas y locales",
+        "description": "Oficinas, consultorios y locales comerciales. Se cotiza por pie cuadrado, con opción de limpieza estándar o profunda."
+      },
+      "postconstruccion": {
+        "name": "Post-construcción",
+        "short": "Después de obra",
+        "description": "Retiro de polvo fino, residuos de obra y adhesivos. Siempre limpieza profunda, cotizada por pie cuadrado."
+      }
+    }
+  },
+
+  "pricing": {
+    "title": "Precios",
+    "intro": "Todos los precios salen de la misma tabla que usa el configurador. Lo que ves aquí es exactamente lo que se te cobra.",
+    "minimumTitle": "Mínimo por servicio",
+    "minimumBody": "Ningún trabajo se cotiza por debajo de {amount}, sin importar el tamaño.",
+    "paymentTitle": "Cómo se paga",
+    "paymentBody": "No se cobra nada al reservar. Te enviamos un link de pago por el total cuando el servicio esté hecho.",
+    "frequencyTitle": "Descuentos por frecuencia",
+    "frequencyBody": "Si contratas servicio recurrente, el descuento se aplica automáticamente en cada visita.",
+    "residentialTitle": "Residencial",
+    "columnSize": "Tamaño",
+    "columnStandard": "Estándar",
+    "columnDeep": "Profunda",
+    "sqftTitle": "Por pie cuadrado",
+    "sqftCommercial": "Comercial",
+    "sqftPostConstruction": "Post-construcción",
+    "perSqft": "por pie²",
+    "minimumLabel": "mínimo",
+    "addonsTitle": "Servicios adicionales",
+    "cta": "Calcular mi precio exacto",
+    "note": "Los precios mostrados son el punto de partida. El configurador ajusta según mascotas, adicionales y frecuencia."
+  },
+
+  "about": {
+    "title": "Nosotros",
+    "lead": "Somos un equipo de limpieza en {city} que cree que pedir un servicio no debería requerir tres llamadas y una visita.",
+    "body1": "Por eso construimos un cotizador que te da el precio real antes de que hables con nadie. Eliges lo que necesitas, ves lo que cuesta y reservas. Sin intermediarios y sin regateo.",
+    "body2": "Trabajamos con personal verificado y asegurado, con productos seguros para niños y mascotas. Si algo no queda como esperabas, volvemos.",
+    "cta": "Reserva tu primera limpieza"
+  },
+
+  "contact": {
+    "title": "Contacto",
+    "intro": "¿Tienes una pregunta antes de reservar? Escríbenos.",
+    "phoneLabel": "Teléfono",
+    "emailLabel": "Correo",
+    "areaLabel": "Zona de servicio",
+    "hoursLabel": "Horario",
+    "hoursValue": "Todos los días, {start} – {end}",
+    "pendingValue": "Por confirmar",
+    "bookingNote": "Para reservar no hace falta llamar: el configurador te da el precio y agenda en el momento.",
+    "cta": "Ir al configurador"
+  },
+
+  "policies": {
+    "title": "Políticas",
+    "intro": "Las reglas de reserva y cancelación. Cortas y sin letra chica.",
+    "noticeTitle": "Anticipación mínima",
+    "noticeBody": "Las reservas requieren al menos {hours} horas de anticipación. Los horarios que no cumplan ese margen aparecen bloqueados en el calendario.",
+    "cancelTitle": "Cancelaciones",
+    "cancelBody": "No se cobra nada al reservar, así que cancelar antes de la cita no tiene ningún costo. Te pedimos avisar con al menos {hours} horas de anticipación para poder ofrecer ese horario a alguien más.",
+    "paymentTitle": "Cómo se paga",
+    "paymentBody": "No se cobra nada al reservar. Cuando el servicio esté hecho, te enviamos un link de pago por el total.",
+    "hoursTitle": "Horario de servicio",
+    "hoursBody": "Atendemos todos los días, incluidos fines de semana, de {start} a {end}.",
+    "minimumTitle": "Mínimo por trabajo",
+    "minimumBody": "Ningún servicio se cotiza por debajo de {amount}."
+  },
+
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "navTitle": "Navegación",
+    "legalTitle": "Legal",
+    "contactTitle": "Contacto"
+  },
+
+  "sizeTiers": {
+    "studio_1": "Studio o 1 habitación",
+    "hab_2": "2 habitaciones",
+    "hab_3": "3 habitaciones",
+    "hab_4": "4 habitaciones",
+    "hab_5": "5 habitaciones o más"
+  },
+
+  "sqftTiers": {
+    "sqft_0_1500": "Hasta 1,500 pie²",
+    "sqft_1501_3000": "1,501 – 3,000 pie²",
+    "sqft_3001_5000": "3,001 – 5,000 pie²",
+    "sqft_5000_plus": "Más de 5,000 pie²"
+  },
+
+  "addons": {
+    "refrigerador": {
+      "name": "Refrigerador por dentro",
+      "description": "Vaciado, limpieza de estantes y desinfección."
+    },
+    "horno": {
+      "name": "Horno por dentro",
+      "description": "Desengrasado de rejillas, puerta y cavidad."
+    },
+    "ventanas": {
+      "name": "Ventanas por dentro",
+      "description": "Vidrios, marcos y rieles accesibles."
+    },
+    "lavanderia": {
+      "name": "Lavandería",
+      "description": "Una carga de lavado, secado y doblado."
+    },
+    "gabinetes": {
+      "name": "Gabinetes por dentro",
+      "description": "Vaciado y limpieza interior de gabinetes de cocina."
+    },
+    "zocalos": {
+      "name": "Zócalos y molduras",
+      "description": "Limpieza a mano de zócalos en toda la propiedad."
+    },
+    "organizacion_1h": {
+      "name": "Organización — 1 hora",
+      "description": "Una hora dedicada a ordenar clósets, despensa o áreas comunes."
+    },
+    "organizacion_2h": {
+      "name": "Organización — 2 horas",
+      "description": "Dos horas de organización."
+    },
+    "organizacion_3h": {
+      "name": "Organización — 3 horas",
+      "description": "Tres horas de organización."
+    },
+    "sabanas": {
+      "name": "Cambio de sábanas",
+      "description": "Cambio y tendido con la ropa de cama que dejes lista."
+    },
+    "amenities": {
+      "name": "Reposición de amenities",
+      "description": "Papel, jabón, café y básicos para el próximo huésped."
+    }
+  },
+
+  "booking": {
+    "title": "Reserva tu limpieza",
+    "progress": "Paso {current} de {total}",
+    "progressStart": "Paso 1",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "estimate": "Tu estimado",
+    "recalculating": "Calculando…",
+    "optional": "Opcional",
+    "selectToContinue": "Elige una opción para continuar",
+
+    "service": {
+      "title": "¿Qué necesitas limpiar?",
+      "subtitle": "El resto de las preguntas se ajusta a lo que elijas aquí."
+    },
+
+    "size": {
+      "titleRooms": "¿De qué tamaño es la propiedad?",
+      "subtitleRooms": "Cuenta solo las habitaciones, no los baños.",
+      "titleSqft": "¿Cuántos pies cuadrados tiene el espacio?",
+      "subtitleSqft": "Un estimado aproximado es suficiente."
+    },
+
+    "rooms": {
+      "title": "Cuéntanos de los espacios",
+      "subtitle": "Esto nos dice cuánto equipo y tiempo llevar. No cambia el precio.",
+      "bedrooms": "Habitaciones",
+      "fullBaths": "Baños completos",
+      "halfBaths": "Medios baños",
+      "decrease": "Quitar uno",
+      "increase": "Agregar uno"
+    },
+
+    "level": {
+      "title": "¿Qué nivel de limpieza?",
+      "subtitle": "La profunda toma más tiempo y llega a lo que no se ve.",
+      "estandar": {
+        "name": "Estándar",
+        "tagline": "Mantenimiento regular",
+        "includes": [
+          "Pisos aspirados y trapeados",
+          "Cocina y baños desinfectados",
+          "Superficies y polvo accesible",
+          "Camas tendidas y basura afuera"
+        ]
+      },
+      "profunda": {
+        "name": "Profunda",
+        "tagline": "Todo lo estándar, y más",
+        "includes": [
+          "Todo lo de la limpieza estándar",
+          "Detrás y debajo de los muebles",
+          "Zócalos, marcos y puertas a mano",
+          "Sarro en duchas y grifería",
+          "Ventilaciones y ventiladores de techo"
+        ]
+      }
+    },
+
+    "pets": {
+      "title": "¿Hay mascotas en casa?",
+      "subtitle": "El pelo requiere tiempo y filtros extra, por eso lo preguntamos.",
+      "none": "No hay mascotas",
+      "one": "Sí, una",
+      "multiple": "Sí, dos o más",
+      "surcharge": "+{amount}",
+      "noSurcharge": "Sin recargo"
+    },
+
+    "addons": {
+      "title": "¿Algo más que quieras agregar?",
+      "subtitle": "Opcional. Puedes seguir sin elegir nada.",
+      "exclusiveNote": "Solo puedes elegir una duración de organización.",
+      "selected": "{count, plural, =0 {Nada seleccionado} one {# adicional} other {# adicionales}}"
+    },
+
+    "frequency": {
+      "title": "¿Cada cuánto lo necesitas?",
+      "subtitle": "El descuento se aplica a cada visita, y puedes cancelar cuando quieras.",
+      "once": "Una sola vez",
+      "weekly": "Cada semana",
+      "weeklyNote": "Se mantiene el descuento",
+      "biweekly": "Cada dos semanas",
+      "monthly": "Una vez al mes",
+      "discount": "−{percent}%",
+      "noDiscount": "Sin descuento"
+    },
+
+    "schedule": {
+      "title": "¿Cuándo te sirve?",
+      "subtitle": "Atendemos todos los días de {start} a {end}.",
+      "dateLabel": "Elige el día",
+      "timeLabel": "Elige la hora",
+      "noticeNote": "Necesitamos al menos {hours} horas de anticipación, por eso algunos horarios aparecen bloqueados.",
+      "noSlots": "No quedan horarios disponibles este día. Prueba con el siguiente.",
+      "today": "Hoy",
+      "tomorrow": "Mañana",
+      "loading": "Cargando horarios…"
+    },
+
+    "contact": {
+      "title": "¿A dónde vamos y a quién buscamos?",
+      "subtitle": "Solo lo necesario para confirmar la cita.",
+      "name": "Nombre completo",
+      "namePlaceholder": "María Rodríguez",
+      "phone": "Teléfono",
+      "phonePlaceholder": "(305) 555-0142",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "maria@ejemplo.com",
+      "address": "Dirección del servicio",
+      "addressPlaceholder": "1200 Brickell Ave, Apt 4B, Miami, FL 33131",
+      "notes": "Notas para el equipo",
+      "notesPlaceholder": "Portón, estacionamiento, dónde está la llave, un cuarto que no se toca…",
+      "errorRequired": "Este campo es obligatorio",
+      "errorEmail": "Escribe un correo válido",
+      "errorPhone": "Escribe un teléfono válido"
+    },
+
+    "payment": {
+      "title": "Revisa y confirma",
+      "subtitle": "Este es el desglose completo de tu reserva.",
+      "detailsTitle": "Tu servicio",
+      "breakdownTitle": "Desglose",
+      "service": "Servicio",
+      "size": "Tamaño",
+      "level": "Nivel",
+      "rooms": "Espacios",
+      "roomsValue": "{bedrooms} hab · {fullBaths} baños · {halfBaths} medios",
+      "pets": "Mascotas",
+      "when": "Fecha y hora",
+      "where": "Dirección",
+      "who": "Contacto",
+      "base": "Precio base",
+      "petSurcharge": "Recargo por mascotas",
+      "subtotal": "Subtotal",
+      "discount": "Descuento por frecuencia ({percent}%)",
+      "minimumNote": "Se aplicó el mínimo de {amount} por servicio.",
+      "total": "Total",
+      "confirm": "Confirmar reserva",
+      "submitting": "Confirmando…",
+      "paymentNotice": "No se cobra nada ahora. Te enviaremos un link de pago por el total cuando el servicio esté hecho.",
+      "editStep": "Editar",
+      "errors": {
+        "notConfigured": "La reserva todavía no está disponible. Escríbenos y la cerramos por teléfono.",
+        "invalidSelection": "Falta algún dato de la reserva. Revisa los pasos anteriores.",
+        "invalidSchedule": "Ese horario ya no está disponible. Vuelve al paso de fecha y elige otro.",
+        "invalidContact": "Revisa tus datos de contacto antes de continuar.",
+        "dbError": "No pudimos confirmar la reserva. Inténtalo de nuevo en un momento.",
+        "network": "Se perdió la conexión. Revisa tu internet e inténtalo otra vez."
+      }
+    },
+
+    "confirmation": {
+      "title": "¡Reserva confirmada!",
+      "subtitle": "Guardamos todos los detalles. No se te cobra nada ahora: cuando el servicio esté hecho te enviamos un link para pagar el total.",
+      "backHome": "Volver al inicio",
+      "newBooking": "Hacer otra reserva"
+    }
+  }
+}

@@ -1,0 +1,368 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "pricing": "Pricing",
+    "about": "About",
+    "contact": "Contact",
+    "policies": "Policies",
+    "book": "Book now",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Language"
+  },
+
+  "home": {
+    "heroTitle": "Professional cleaning, with a clear price from the first tap",
+    "heroSubtitle": "Get a quote and book in under two minutes from your phone. No phone calls, no walkthroughs, no surprises on the invoice.",
+    "ctaPrimary": "Get my price",
+    "ctaSecondary": "See services",
+    "discountBadge": "20% Discount",
+    "discountBadgeShort": "-20%",
+    "introDirtyMessage": "Your screen is dirty",
+    "trustTitle": "Why book with us",
+    "trust": {
+      "priceTitle": "Locked-in price up front",
+      "priceBody": "The estimate you see when booking is what you pay. No hidden fees.",
+      "bookingTitle": "Book in two minutes",
+      "bookingBody": "Pick your service, size and time slot. We confirm instantly.",
+      "insuredTitle": "Insured crew",
+      "insuredBody": "Vetted cleaners, covered by liability insurance."
+    },
+    "servicesTitle": "What we clean",
+    "servicesLink": "See all services",
+    "howTitle": "How it works",
+    "how": {
+      "step1Title": "Get a quote",
+      "step1Body": "Answer a few questions and watch your price update live.",
+      "step2Title": "Pick a time",
+      "step2Body": "Choose the day and hour that work for you.",
+      "step3Title": "Done",
+      "step3Body": "We arrive with everything. You don't have to prep a thing."
+    },
+    "finalCtaTitle": "Ready for a clean place?",
+    "finalCtaBody": "Get your price now. No card needed to see the estimate.",
+    "finalCtaButton": "Get started"
+  },
+
+  "services": {
+    "title": "Services",
+    "intro": "Five kinds of cleaning, each priced by its own rules. Pick what you need and get the price instantly.",
+    "cta": "Get a quote for this",
+    "items": {
+      "residencial": {
+        "name": "Residential cleaning",
+        "short": "Homes and apartments",
+        "description": "Regular or deep cleaning of your home. Choose the level and add extras like fridge, oven or organizing."
+      },
+      "airbnb": {
+        "name": "Airbnb / Turnover",
+        "short": "Between guests",
+        "description": "Fast turnaround between stays: fresh linens, restocked amenities and the place ready for the next check-in."
+      },
+      "mudanza": {
+        "name": "Move-in / Move-out",
+        "short": "When you move",
+        "description": "Deep cleaning of an empty property. Built for getting your deposit back or walking into a spotless home."
+      },
+      "comercial": {
+        "name": "Commercial",
+        "short": "Offices and retail",
+        "description": "Offices, clinics and retail spaces. Priced per square foot, with standard or deep cleaning."
+      },
+      "postconstruccion": {
+        "name": "Post-construction",
+        "short": "After the build",
+        "description": "Fine dust, construction debris and adhesive residue removed. Always a deep clean, priced per square foot."
+      }
+    }
+  },
+
+  "pricing": {
+    "title": "Pricing",
+    "intro": "Every price here comes from the same table the booking flow uses. What you see is exactly what you're charged.",
+    "minimumTitle": "Service minimum",
+    "minimumBody": "No job is quoted below {amount}, regardless of size.",
+    "paymentTitle": "How payment works",
+    "paymentBody": "Nothing is charged when you book. We'll send a payment link for the full total once the job is done.",
+    "frequencyTitle": "Recurring discounts",
+    "frequencyBody": "Book recurring service and the discount applies automatically to every visit.",
+    "residentialTitle": "Residential",
+    "columnSize": "Size",
+    "columnStandard": "Standard",
+    "columnDeep": "Deep",
+    "sqftTitle": "Per square foot",
+    "sqftCommercial": "Commercial",
+    "sqftPostConstruction": "Post-construction",
+    "perSqft": "per sq ft",
+    "minimumLabel": "minimum",
+    "addonsTitle": "Add-on services",
+    "cta": "Calculate my exact price",
+    "note": "These are starting prices. The booking flow adjusts for pets, add-ons and frequency."
+  },
+
+  "about": {
+    "title": "About us",
+    "lead": "We're a cleaning crew in {city} who think booking a service shouldn't take three phone calls and a site visit.",
+    "body1": "So we built a quote tool that gives you the real price before you talk to anyone. Pick what you need, see what it costs, book it. No middlemen, no haggling.",
+    "body2": "We work with vetted, insured cleaners and products that are safe around kids and pets. If something isn't right, we come back.",
+    "cta": "Book your first clean"
+  },
+
+  "contact": {
+    "title": "Contact",
+    "intro": "Got a question before you book? Reach out.",
+    "phoneLabel": "Phone",
+    "emailLabel": "Email",
+    "areaLabel": "Service area",
+    "hoursLabel": "Hours",
+    "hoursValue": "Every day, {start} – {end}",
+    "pendingValue": "Coming soon",
+    "bookingNote": "You don't need to call to book: the quote tool prices and schedules it on the spot.",
+    "cta": "Go to the booking flow"
+  },
+
+  "policies": {
+    "title": "Policies",
+    "intro": "Booking and cancellation rules. Short, and no fine print.",
+    "noticeTitle": "Minimum notice",
+    "noticeBody": "Bookings need at least {hours} hours of notice. Slots that don't meet that window show up blocked on the calendar.",
+    "cancelTitle": "Cancellations",
+    "cancelBody": "Nothing is charged when you book, so canceling ahead of the appointment costs you nothing. We just ask for at least {hours} hours notice so we can offer that slot to someone else.",
+    "paymentTitle": "How payment works",
+    "paymentBody": "Nothing is charged when you book. Once the job is done, we send a payment link for the full total.",
+    "hoursTitle": "Service hours",
+    "hoursBody": "We work every day, weekends included, from {start} to {end}.",
+    "minimumTitle": "Job minimum",
+    "minimumBody": "No service is quoted below {amount}."
+  },
+
+  "footer": {
+    "rights": "All rights reserved.",
+    "navTitle": "Navigation",
+    "legalTitle": "Legal",
+    "contactTitle": "Contact"
+  },
+
+  "sizeTiers": {
+    "studio_1": "Studio or 1 bedroom",
+    "hab_2": "2 bedrooms",
+    "hab_3": "3 bedrooms",
+    "hab_4": "4 bedrooms",
+    "hab_5": "5 bedrooms or more"
+  },
+
+  "sqftTiers": {
+    "sqft_0_1500": "Up to 1,500 sq ft",
+    "sqft_1501_3000": "1,501 – 3,000 sq ft",
+    "sqft_3001_5000": "3,001 – 5,000 sq ft",
+    "sqft_5000_plus": "Over 5,000 sq ft"
+  },
+
+  "addons": {
+    "refrigerador": {
+      "name": "Inside the fridge",
+      "description": "Emptied, shelves cleaned and sanitized."
+    },
+    "horno": {
+      "name": "Inside the oven",
+      "description": "Racks, door and cavity degreased."
+    },
+    "ventanas": {
+      "name": "Interior windows",
+      "description": "Reachable glass, frames and tracks."
+    },
+    "lavanderia": {
+      "name": "Laundry",
+      "description": "One load washed, dried and folded."
+    },
+    "gabinetes": {
+      "name": "Inside cabinets",
+      "description": "Kitchen cabinets emptied and wiped inside."
+    },
+    "zocalos": {
+      "name": "Baseboards and trim",
+      "description": "Baseboards hand-wiped throughout the property."
+    },
+    "organizacion_1h": {
+      "name": "Organizing — 1 hour",
+      "description": "An hour spent on closets, pantry or shared areas."
+    },
+    "organizacion_2h": {
+      "name": "Organizing — 2 hours",
+      "description": "Two hours of organizing."
+    },
+    "organizacion_3h": {
+      "name": "Organizing — 3 hours",
+      "description": "Three hours of organizing."
+    },
+    "sabanas": {
+      "name": "Linen change",
+      "description": "Beds stripped and made with the linens you leave out."
+    },
+    "amenities": {
+      "name": "Restock amenities",
+      "description": "Paper, soap, coffee and basics for the next guest."
+    }
+  },
+
+  "booking": {
+    "title": "Book your cleaning",
+    "progress": "Step {current} of {total}",
+    "progressStart": "Step 1",
+    "next": "Next",
+    "back": "Back",
+    "estimate": "Your estimate",
+    "recalculating": "Calculating…",
+    "optional": "Optional",
+    "selectToContinue": "Pick an option to continue",
+
+    "service": {
+      "title": "What needs cleaning?",
+      "subtitle": "Everything after this adapts to what you pick here."
+    },
+
+    "size": {
+      "titleRooms": "How big is the place?",
+      "subtitleRooms": "Count bedrooms only, not bathrooms.",
+      "titleSqft": "How many square feet is the space?",
+      "subtitleSqft": "A rough estimate is fine."
+    },
+
+    "rooms": {
+      "title": "Tell us about the rooms",
+      "subtitle": "This tells us how much crew and time to bring. It doesn't change the price.",
+      "bedrooms": "Bedrooms",
+      "fullBaths": "Full bathrooms",
+      "halfBaths": "Half bathrooms",
+      "decrease": "Remove one",
+      "increase": "Add one"
+    },
+
+    "level": {
+      "title": "Which level of clean?",
+      "subtitle": "A deep clean takes longer and reaches what you don't see.",
+      "estandar": {
+        "name": "Standard",
+        "tagline": "Regular upkeep",
+        "includes": [
+          "Floors vacuumed and mopped",
+          "Kitchen and bathrooms sanitized",
+          "Surfaces and reachable dust",
+          "Beds made and trash taken out"
+        ]
+      },
+      "profunda": {
+        "name": "Deep",
+        "tagline": "Everything standard, plus more",
+        "includes": [
+          "Everything in the standard clean",
+          "Behind and under the furniture",
+          "Baseboards, frames and doors by hand",
+          "Limescale in showers and fixtures",
+          "Vents and ceiling fans"
+        ]
+      }
+    },
+
+    "pets": {
+      "title": "Any pets at home?",
+      "subtitle": "Pet hair takes extra time and filters, which is why we ask.",
+      "none": "No pets",
+      "one": "Yes, one",
+      "multiple": "Yes, two or more",
+      "surcharge": "+{amount}",
+      "noSurcharge": "No surcharge"
+    },
+
+    "addons": {
+      "title": "Anything you'd like to add?",
+      "subtitle": "Optional. You can move on without picking any.",
+      "exclusiveNote": "You can only pick one organizing duration.",
+      "selected": "{count, plural, =0 {Nothing selected} one {# add-on} other {# add-ons}}"
+    },
+
+    "frequency": {
+      "title": "How often do you need it?",
+      "subtitle": "The discount applies to every visit, and you can cancel anytime.",
+      "once": "One time only",
+      "weekly": "Every week",
+      "weeklyNote": "The discount stays the same",
+      "biweekly": "Every two weeks",
+      "monthly": "Once a month",
+      "discount": "−{percent}%",
+      "noDiscount": "No discount"
+    },
+
+    "schedule": {
+      "title": "When works for you?",
+      "subtitle": "We work every day from {start} to {end}.",
+      "dateLabel": "Pick a day",
+      "timeLabel": "Pick a time",
+      "noticeNote": "We need at least {hours} hours of notice, which is why some slots are blocked.",
+      "noSlots": "No slots left on this day. Try the next one.",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "loading": "Loading slots…"
+    },
+
+    "contact": {
+      "title": "Where are we going, and who do we ask for?",
+      "subtitle": "Just what we need to confirm the appointment.",
+      "name": "Full name",
+      "namePlaceholder": "Maria Rodriguez",
+      "phone": "Phone",
+      "phonePlaceholder": "(305) 555-0142",
+      "email": "Email",
+      "emailPlaceholder": "maria@example.com",
+      "address": "Service address",
+      "addressPlaceholder": "1200 Brickell Ave, Apt 4B, Miami, FL 33131",
+      "notes": "Notes for the crew",
+      "notesPlaceholder": "Gate code, parking, where the key is, a room to skip…",
+      "errorRequired": "This field is required",
+      "errorEmail": "Enter a valid email",
+      "errorPhone": "Enter a valid phone number"
+    },
+
+    "payment": {
+      "title": "Review and confirm",
+      "subtitle": "Here's the full breakdown of your booking.",
+      "detailsTitle": "Your service",
+      "breakdownTitle": "Breakdown",
+      "service": "Service",
+      "size": "Size",
+      "level": "Level",
+      "rooms": "Rooms",
+      "roomsValue": "{bedrooms} bd · {fullBaths} ba · {halfBaths} half",
+      "pets": "Pets",
+      "when": "Date and time",
+      "where": "Address",
+      "who": "Contact",
+      "base": "Base price",
+      "petSurcharge": "Pet surcharge",
+      "subtotal": "Subtotal",
+      "discount": "Frequency discount ({percent}%)",
+      "minimumNote": "The {amount} service minimum was applied.",
+      "total": "Total",
+      "confirm": "Confirm booking",
+      "submitting": "Confirming…",
+      "paymentNotice": "Nothing is charged now. We'll send a payment link for the total once the job is done.",
+      "editStep": "Edit",
+      "errors": {
+        "notConfigured": "Booking isn't available yet. Get in touch and we'll book it over the phone.",
+        "invalidSelection": "Something's missing from your booking. Check the earlier steps.",
+        "invalidSchedule": "That slot is no longer available. Go back to the date step and pick another.",
+        "invalidContact": "Please check your contact details before continuing.",
+        "dbError": "We couldn't confirm the booking. Try again in a moment.",
+        "network": "Connection lost. Check your internet and try again."
+      }
+    },
+
+    "confirmation": {
+      "title": "Booking confirmed!",
+      "subtitle": "We saved all the details. Nothing is charged now — once the job is done, we'll send a link to pay the total.",
+      "backHome": "Back to home",
+      "newBooking": "Make another booking"
+    }
+  }
+}
