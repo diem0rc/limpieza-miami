@@ -39,10 +39,32 @@
   object-fit: cover;
 }
 
+/* Funde el borde inferior del video con el color de la sección que sigue
+   (TrustReasons usa bg-alt) para que no quede una línea dura entre los dos.
+   Va ENTRE el video y .overlay a propósito: así queda DETRÁS de los botones
+   —que nunca se lavan, apenas hay 2rem entre el último y el borde— en vez
+   de encima de ellos. Para que se vea, el scrim de .overlay se apaga en
+   esta misma franja; ver el primer tramo de su gradiente. */
+.bottomFade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--brand-bg-alt));
+}
+
 /* Scrim para que el texto se lea sobre cualquier fotograma del video —
    derivado de --brand-text con color-mix(), mismo recurso que ya usa
    IntroAnimation.module.css para sus texturas menores: no es un color de
-   marca nuevo, es una variación puntual de uno que ya existe. */
+   marca nuevo, es una variación puntual de uno que ya existe.
+   El primer tramo (transparente abajo, scrim completo recién a 6rem) es lo
+   que deja pasar a .bottomFade: si el scrim llegara oscuro hasta el borde,
+   taparía el fundido y la línea seguiría ahí. Esas 6rem son las mismas que
+   mide .bottomFade — si una cambia, cambiar la otra. El texto no pierde
+   legibilidad porque vive bastante más arriba, y lo único que queda dentro
+   de la franja son los botones, que tienen relleno sólido propio. */
 .overlay {
   position: absolute;
   inset: 0;
@@ -53,7 +75,8 @@
   padding: 2rem 1.5rem;
   background: linear-gradient(
     to top,
-    color-mix(in srgb, var(--brand-text) 65%, transparent),
+    transparent 0,
+    color-mix(in srgb, var(--brand-text) 65%, transparent) 6rem,
     transparent 65%
   );
 }

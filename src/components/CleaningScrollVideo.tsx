@@ -191,6 +191,8 @@ export default function CleaningScrollVideo() {
           </video>
         )}
 
+        <div className={styles.bottomFade} aria-hidden />
+
         <div className={styles.overlay}>
           <h1 className={styles.title}>{t("heroTitle")}</h1>
           <p className={styles.subtitle}>{t("heroSubtitle")}</p>
