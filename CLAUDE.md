@@ -386,25 +386,44 @@ valor de `pricing.config.ts` — pregunta antes: eso sí sería nuevo.
     De paso se le quitó el audio (`-an`): el `<video>` va `muted`, así que
     la pista de audio que Higgsfield generó igual no se usaba para nada —
     solo pesaba.
+    **El reencodeo está automatizado en `scripts/encode-scroll-video.sh`** —
+    ahí viven los flags y el porqué de cada uno, además de una verificación
+    que falla si el resultado no queda todo-keyframes o sin faststart.
     **Cuando llegue el video final en 1080p/6s (pendiente de créditos de
-    Higgsfield), hay que reencodificarlo con este mismo comando antes de
-    subirlo** — el problema es inherente a cómo generan estas herramientas
-    el archivo, no algo puntual de este clip:
+    Higgsfield), hay que pasarlo por ese script antes de subirlo** — el
+    problema es inherente a cómo generan estas herramientas el archivo, no
+    algo puntual de este clip:
     ```bash
-    ffmpeg -i ORIGINAL.mp4 -an -c:v libx264 -preset slow -crf 20 \
-      -g 1 -keyint_min 1 -sc_threshold 0 -bf 0 -pix_fmt yuv420p sala-limpieza.mp4
+    scripts/encode-scroll-video.sh ORIGINAL.mp4 public/videos/sala-limpieza.mp4
     ```
-    El costo es tamaño de archivo: un encode todo-keyframes pesa bastante
-    más que uno con GOP largo a la misma calidad (2.7MB → 4.9MB en este
-    clip de 4s) — sigue siendo "pocos MB", pero no asumir que un video más
-    largo (6s a más resolución) vaya a pesar proporcionalmente poco; medir
-    el archivo resultante antes de darlo por bueno.
-    Verificado con `ffprobe -show_entries frame=pict_type` (confirma
-    120/120 cuadros como `I`) y con una prueba de seeks reales contra el
-    servidor de Next (el `python -m http.server` usado en un primer
-    intento de medir esto NO sirve: no soporta `Range requests`, y sin eso
-    cualquier medición de seek da resultados falsos — hay que probar contra
-    un servidor que responda `206 Partial Content`).
+    Dos cosas se sumaron después de la primera versión, las dos medidas
+    porque el usuario reportó que el clip de escritorio se sentía trabado:
+    - **`-movflags +faststart`.** Los dos archivos tenían el índice (`moov`)
+      al final — `mdat` arrancaba en el byte 44 y `moov` no aparecía ni en
+      los primeros 2MB. Con el índice al final el navegador tiene que
+      descargar casi todo el archivo antes de poder buscar, así que el
+      scrubbing se traba hasta que termina de bajar por más que los
+      keyframes estén bien. No cuesta calidad: es solo reordenar átomos.
+    - **20fps en vez de 30.** El scrubbing mapea scroll → tiempo, así que lo
+      que importa no es que sean 30 cuadros por segundo sino cuántos cuadros
+      distintos hay a lo largo del recorrido. Bajar a 20fps saca un tercio
+      de los bytes sin tocar la nitidez de cada cuadro. Medido con VMAF
+      contra el archivo anterior: crf23 da 93.6, crf26 da 89.3, crf28 da
+      86.0. Se eligió crf23 + 20fps. Resultado: escritorio 4.9MB → 2.8MB,
+      vertical 6.2MB → 3.7MB, ambos con 80/80 cuadros como `I` y duración
+      exacta de 4.000s (que el `currentTime` siga mapeando igual depende de
+      eso, no de los fps).
+    Referencia de densidad, por si algún día se quiere bajar más: en un
+    viewport de 900px el recorrido es ~1460px, así que 80 cuadros son uno
+    cada ~18px de scroll. Menos que eso empieza a notarse escalonado cuando
+    se scrollea despacio.
+    Verificado con `ffprobe -show_entries frame=pict_type` (confirma que
+    todos los cuadros son `I`) y con una prueba de seeks reales contra el
+    servidor de Next: 2.5-5ms por salto, simétrico en ambas direcciones. El
+    `python -m http.server` usado en un primer intento de medir esto NO
+    sirve: no soporta `Range requests`, y sin eso cualquier medición de seek
+    da resultados falsos — hay que probar contra un servidor que responda
+    `206 Partial Content`.
 
 20. **`CleaningScrollVideo` tiene una fuente de video (y de imagen fija)
     distinta para móvil, y el `<video>` se "ceba" con play()+pause() al
