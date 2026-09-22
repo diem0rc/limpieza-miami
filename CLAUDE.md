@@ -20,6 +20,15 @@ El `README.md` explica la arquitectura y cómo poner en marcha Stripe. Este
 archivo es lo otro: las decisiones deliberadas y las trampas, para no volver a
 deducirlas ni "arreglar" cosas que están así a propósito.
 
+**El repo se recuperó desde el deployment de Vercel el 2026-09-21**: la
+carpeta local original se perdió y no había Git conectado, así que el
+historial empieza de cero en un solo commit (`Recuperado desde Vercel`) que
+empaqueta el estado completo. Un solo commit no significa proyecto nuevo ni a
+medias — el código y este mismo archivo ya traían las 20 entradas de
+decisiones de abajo; lo que se perdió fue el historial de commits previo, no
+el trabajo. No asumas por el `git log` corto que algo de lo documentado acá
+está sin probar.
+
 # Regla dura: la lógica de `src/config/` no se toca; los valores sí
 
 `brand.config.ts`, `pricing.config.ts` y `pricing.ts` los entregó el usuario ya
