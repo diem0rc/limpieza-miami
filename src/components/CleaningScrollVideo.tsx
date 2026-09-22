@@ -45,6 +45,10 @@ export default function CleaningScrollVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const targetProgress = useRef(0);
   const frameId = useRef<number | null>(null);
+  /** Última fuente que este componente le pidió al <video> — ver el efecto
+   *  de abajo; evita comparar contra `video.currentSrc`, que se actualiza
+   *  con retraso respecto a un `.load()` recién pedido. */
+  const lastRequestedSrc = useRef<string | null>(null);
 
   useEffect(() => {
     // Con "reducir movimiento" activado no se monta nada de esto: la <img>
@@ -54,6 +58,37 @@ export default function CleaningScrollVideo() {
     const runway = runwayRef.current;
     const video = videoRef.current;
     if (!runway || !video) return;
+
+    // A diferencia de <picture>, un <video> con <source media="..."> elige
+    // el archivo UNA SOLA VEZ — cuando el elemento se crea, o cuando algo
+    // llama a .load() — y no vuelve a mirar los <source> si el viewport
+    // real termina siendo otro. En una página hidratada por React eso deja
+    // una ventana real donde el navegador puede decidir antes de que el
+    // viewport esté asentado, y el video se queda con el archivo
+    // equivocado sin corregirse solo (síntoma reportado: video de
+    // escritorio en el teléfono o viceversa, que solo se arregla si algo
+    // fuerza que el <video> se vuelva a montar, como cambiar de idioma).
+    // Los <source media> siguen ahí como respaldo sin JS; acá se fuerza la
+    // fuente correcta según el mismo `isNarrow` que ya decide el poster, y
+    // se llama a .load() explícito — sin esto, reasignar `src` a mano no
+    // hace que el navegador vuelva a intentar cargar nada.
+    const targetSrc = isNarrow
+      ? "/videos/sala-limpieza-vertical.mp4"
+      : "/videos/sala-limpieza.mp4";
+    // Comparar contra `video.currentSrc` (en vez de contra la ref de abajo)
+    // parece más directo, pero `currentSrc` tarda en reflejar un `.load()`
+    // recién pedido — con dos renders seguidos (el de `isNarrow` por
+    // defecto y el que lo corrige después de hidratar) esa lectura queda
+    // vieja y el segundo chequeo se cree "ya está bien" cuando en realidad
+    // el primer `.load()` (con el valor todavía por defecto) sigue en
+    // curso y termina "ganando". `lastRequestedSrc` evita la carrera: es
+    // solo lo último que ESTE efecto pidió, sin depender de que el
+    // navegador ya haya terminado de procesarlo.
+    if (lastRequestedSrc.current !== targetSrc) {
+      video.src = targetSrc;
+      video.load();
+      lastRequestedSrc.current = targetSrc;
+    }
 
     // En iOS y algunos Android, un <video> al que nunca se le pidió
     // reproducir no llega a decodificar ni pintar NINGÚN cuadro — se ve
@@ -110,7 +145,10 @@ export default function CleaningScrollVideo() {
       window.removeEventListener("resize", updateTargetProgress);
       if (frameId.current !== null) cancelAnimationFrame(frameId.current);
     };
-  }, [prefersReducedMotion]);
+    // `isNarrow` entra a la lista de dependencias a propósito: si cambia
+    // (viewport recién asentado tras hidratar, o un resize real que cruza
+    // el breakpoint) este efecto se vuelve a correr y corrige la fuente.
+  }, [prefersReducedMotion, isNarrow]);
 
   return (
     <section className={styles.runway} ref={runwayRef}>
@@ -142,8 +180,12 @@ export default function CleaningScrollVideo() {
           >
             {/* Mismo motivo que el <picture> de arriba: en un teléfono, el
                 recorte horizontal escalado con cover dejaría casi todo el
-                cuadro fuera de pantalla por los costados. El navegador
-                elige la fuente él solo según el viewport, sin JS. */}
+                cuadro fuera de pantalla por los costados. Estos <source>
+                son el respaldo para cuando no hay JS (o para el primer
+                instante antes de que el efecto de arriba corrija) — a
+                diferencia de <picture>, un <video> no vuelve a mirarlos si
+                el viewport real resulta otro, así que con JS disponible la
+                fuente de verdad es `isNarrow` (ver el efecto de arriba). */}
             <source media="(max-width: 767px)" src="/videos/sala-limpieza-vertical.mp4" />
             <source src="/videos/sala-limpieza.mp4" />
           </video>

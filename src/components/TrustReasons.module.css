@@ -1,0 +1,42 @@
+/* Partículas de "polvo" sobre el texto de cada razón — ver TrustReasons.tsx.
+   Nada de rectángulo, caja ni color de fondo detrás: cada partícula es un
+   círculo suelto e independiente, apoyado directamente sobre lo que haya
+   debajo (el texto, o el fondo blanco de la tarjeta entre una partícula y
+   la siguiente) — igual que un grano de tierra, no una mancha sobre una
+   superficie pintada.
+
+   Misma técnica que .smudge en IntroAnimation.module.css: radial-gradient
+   circular con color-mix hacia transparente, sin ninguna capa detrás. Dos
+   diferencias a propósito, no un descuido: acá el color es --brand-grime
+   (el tono de polvo del sitio; .smudge usa --brand-text-muted porque ahí
+   es una sombra encima de la capa de grime propiamente dicha, que en esta
+   sección no existe) y la mezcla es mucho más opaca en el centro (92% vs
+   35%) — en IntroAnimation el smudge es un detalle sutil sobre una base ya
+   opaca; acá cada partícula tiene que tapar el texto por sí sola. */
+.dustLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dustParticle {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-grime) 96%, transparent) 0%,
+    color-mix(in srgb, var(--brand-grime) 96%, transparent) 52%,
+    transparent 85%
+  );
+  will-change: opacity, transform;
+}
+
+.broom {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 15%));
+}

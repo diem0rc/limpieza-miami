@@ -1,12 +1,12 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { SERVICE_TYPES } from "@/lib/booking-options";
 import { ROUTES } from "@/lib/routes";
 import Container from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import IntroAnimation from "@/components/IntroAnimation";
 import CleaningScrollVideo from "@/components/CleaningScrollVideo";
+import TrustReasons from "@/components/TrustReasons";
+import ServicesCarousel from "@/components/ServicesCarousel";
 
 export default async function HomePage({
   params,
@@ -20,7 +20,6 @@ export default async function HomePage({
 
 function Home() {
   const t = useTranslations("home");
-  const tServices = useTranslations("services");
 
   return (
     <>
@@ -33,60 +32,13 @@ function Home() {
           CleaningScrollVideo.tsx: ya no hay un <section> de Hero aparte. */}
       <CleaningScrollVideo />
 
-      {/* Confianza */}
-      <section className="bg-bg-alt">
-        <Container className="py-16">
-          <h2 className="text-h2 font-bold tracking-tight">
-            {t("trustTitle")}
-          </h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {(["price", "booking", "insured"] as const).map((key) => (
-              <div
-                key={key}
-                className="rounded-lg border border-border bg-surface p-6"
-              >
-                <h3 className="text-h3 font-semibold">
-                  {t(`trust.${key}Title`)}
-                </h3>
-                <p className="mt-2 text-small leading-relaxed text-text-muted">
-                  {t(`trust.${key}Body`)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+      {/* Confianza — texto tapado de polvo, una escoba lo barre con el
+          scroll. Ver TrustReasons.tsx. */}
+      <TrustReasons />
 
-      {/* Servicios */}
-      <section>
-        <Container className="py-16">
-          <h2 className="text-h2 font-bold tracking-tight">
-            {t("servicesTitle")}
-          </h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICE_TYPES.map((id) => (
-              <Link
-                key={id}
-                href={ROUTES.services}
-                className="group rounded-lg border border-border bg-surface p-6 transition-colors hover:border-border-strong hover:bg-surface-hover"
-              >
-                <p className="text-tiny font-semibold uppercase tracking-wider text-accent">
-                  {tServices(`items.${id}.short`)}
-                </p>
-                <h3 className="mt-2 text-h3 font-semibold">
-                  {tServices(`items.${id}.name`)}
-                </h3>
-              </Link>
-            ))}
-          </div>
-          <Link
-            href={ROUTES.services}
-            className="mt-8 inline-block text-small font-semibold text-accent hover:text-accent-soft"
-          >
-            {t("servicesLink")} →
-          </Link>
-        </Container>
-      </section>
+      {/* Servicios — carrusel, cada tarjeta enlaza directo al configurador
+          con el servicio ya elegido. Ver ServicesCarousel.tsx. */}
+      <ServicesCarousel />
 
       {/* Cómo funciona */}
       <section className="bg-bg-alt">

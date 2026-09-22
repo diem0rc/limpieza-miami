@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ROUTES } from "@/lib/routes";
+import { SERVICE_TYPES } from "@/lib/booking-options";
+import type { ServiceType } from "@/config/pricing.config";
 import BrandMark from "@/components/BrandMark";
 import Container from "@/components/ui/Container";
 import { BookingProvider, useBooking } from "@/components/booking/store";
@@ -20,9 +23,23 @@ import ScheduleStep from "@/components/booking/steps/ScheduleStep";
 import ContactStep from "@/components/booking/steps/ContactStep";
 import PaymentStep from "@/components/booking/steps/PaymentStep";
 
+function isServiceType(value: string | null): value is ServiceType {
+  return SERVICE_TYPES.includes(value as ServiceType);
+}
+
 export default function BookingFlow() {
+  // `?servicio=` viene de las tarjetas de ServicesCarousel.tsx en la home —
+  // con un valor válido, el configurador arranca con ese servicio ya
+  // elegido (ver `buildInitialState` en store.tsx). `useSearchParams` exige
+  // un límite de Suspense por encima (lo pone `(booking)/reservar/page.tsx`)
+  // para que la ruta pueda seguir siendo SSG.
+  const requestedService = useSearchParams().get("servicio");
+  const initialServiceType = isServiceType(requestedService)
+    ? requestedService
+    : undefined;
+
   return (
-    <BookingProvider>
+    <BookingProvider initialServiceType={initialServiceType}>
       <Flow />
     </BookingProvider>
   );

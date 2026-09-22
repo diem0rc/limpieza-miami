@@ -31,6 +31,8 @@
     },
     "servicesTitle": "Qué limpiamos",
     "servicesLink": "Ver todos los servicios",
+    "servicesPrev": "Anterior",
+    "servicesNext": "Siguiente",
     "howTitle": "Cómo funciona",
     "how": {
       "step1Title": "Cotiza",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import BookingFlow from "@/components/booking/BookingFlow";
 
@@ -19,5 +20,13 @@ export default async function BookingPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <BookingFlow />;
+  // BookingFlow lee `?servicio=` con useSearchParams(), que exige un límite
+  // de Suspense por encima para que la ruta pueda seguir siendo SSG (ver
+  // CLAUDE.md, "Cómo verificar un cambio": todas las páginas deben quedar
+  // estáticas salvo /api/* y /reservar/confirmacion).
+  return (
+    <Suspense>
+      <BookingFlow />
+    </Suspense>
+  );
 }

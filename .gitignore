@@ -1,0 +1,10 @@
+.vercel
+.env*
+
+node_modules/
+.next/
+.DS_Store
+
+# Copias originales de las fotos del carrusel; las que sirve el sitio están
+# en public/images/.
+imagenes/

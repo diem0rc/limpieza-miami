@@ -76,6 +76,20 @@ const INITIAL_STATE: BookingState = {
   stepIndex: 0,
 };
 
+/**
+ * Cuando se llega desde una tarjeta de servicio de la home (`?servicio=`,
+ * ver ServicesCarousel.tsx), el servicio ya está decidido — no tiene sentido
+ * volver a preguntarlo en el paso 0. Arranca directo en "size" (paso 1, el
+ * mismo índice para los 5 servicios, ver `getStepsFor()`), que ya adapta su
+ * propia pregunta (tramo de habitaciones o de pies cuadrados) según
+ * `serviceType`. No pasa por el reducer/`applyServiceChange` porque eso es
+ * para CAMBIAR de servicio a mitad de flujo, no para el arranque inicial.
+ */
+function buildInitialState(initialServiceType?: ServiceType): BookingState {
+  if (!initialServiceType) return INITIAL_STATE;
+  return { ...INITIAL_STATE, serviceType: initialServiceType, stepIndex: 1 };
+}
+
 /** Habitaciones implícitas en cada tramo, para precargar los contadores. */
 const BEDROOMS_BY_TIER: Record<SizeTier, number> = {
   studio_1: 1,
@@ -319,8 +333,15 @@ interface BookingContextValue {
 
 const BookingContext = createContext<BookingContextValue | null>(null);
 
-export function BookingProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+export function BookingProvider({
+  children,
+  initialServiceType,
+}: {
+  children: ReactNode;
+  /** Preselección desde `?servicio=` en /reservar — ver `buildInitialState`. */
+  initialServiceType?: ServiceType;
+}) {
+  const [state, dispatch] = useReducer(reducer, initialServiceType, buildInitialState);
 
   const value = useMemo<BookingContextValue>(() => {
     const steps = stepsOf(state);

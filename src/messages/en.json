@@ -31,6 +31,8 @@
     },
     "servicesTitle": "What we clean",
     "servicesLink": "See all services",
+    "servicesPrev": "Previous",
+    "servicesNext": "Next",
     "howTitle": "How it works",
     "how": {
       "step1Title": "Get a quote",
