@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { StepId } from "@/config/pricing";
 import { FLOW_RULES } from "@/config/pricing.config";
@@ -35,7 +35,15 @@ export default function PaymentStep() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // `submitting` deshabilita el botón, pero no sirve como cerrojo: setState
+  // de React no es síncrono, así que dos toques en el mismo ciclo encuentran
+  // el botón todavía habilitado y disparan dos reservas (verificado: dos
+  // POST /api/bookings seguidas, ambas 200). Este ref sí cambia en el acto.
+  const enviando = useRef(false);
+
   async function confirmBooking() {
+    if (enviando.current) return;
+    enviando.current = true;
     setSubmitting(true);
     setError(null);
     try {
@@ -65,6 +73,7 @@ export default function PaymentStep() {
       if (!response.ok || !data.ok) {
         setError(typeof data.error === "string" ? data.error : "dbError");
         setSubmitting(false);
+        enviando.current = false; // falló: tiene que poder reintentar
         return;
       }
 
@@ -74,6 +83,7 @@ export default function PaymentStep() {
     } catch {
       setError("network");
       setSubmitting(false);
+      enviando.current = false; // se cayó la red: tiene que poder reintentar
     }
   }
 
