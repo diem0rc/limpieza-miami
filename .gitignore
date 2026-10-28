@@ -5,6 +5,10 @@ node_modules/
 .next/
 .DS_Store
 
+# Reporte de auditoría: el repo es público y el reporte describe hallazgos
+# de seguridad. No commitear.
+AUDIT_REPORT.md
+
 # Copias originales de las fotos del carrusel; las que sirve el sitio están
 # en public/images/.
 imagenes/

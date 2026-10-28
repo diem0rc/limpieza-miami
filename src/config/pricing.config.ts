@@ -204,11 +204,20 @@ export const ADDONS: Addon[] = [
 // DESCUENTOS POR FRECUENCIA
 // ─────────────────────────────────────────────────────────────
 
+// La escalera tiene que premiar al cliente recurrente: cada frecuencia más
+// seguida descuenta más que la siguiente, y todas descuentan más que "una
+// sola vez". Antes no era así (once y weekly empataban en 20%, y quincenal y
+// mensual daban MENOS que no comprometerse a nada), así que comprometerse
+// salía más caro.
 export const FREQUENCY_DISCOUNT: Record<Frequency, number> = {
-  once: 0.20,       // −20% (promoción)
-  weekly: 0.20,     // −20%
-  biweekly: 0.15,   // −15%
-  monthly: 0.10,    // −10%
+  // Promoción de lanzamiento. Cuando termine, este valor baja a 0 y la
+  // escalera de abajo sigue funcionando sola. Ojo: la insignia "-20%" del
+  // hero anuncia justamente este número (ver PrimaryCtaWithDiscount.tsx y
+  // la clave `discountBadge`), así que si se toca, hay que tocar las dos.
+  once: 0.20,       // −20%
+  weekly: 0.25,     // −25%
+  biweekly: 0.20,   // −20%
+  monthly: 0.15,    // −15%
 };
 
 /** Frecuencia recurrente solo disponible en estos servicios */
