@@ -37,6 +37,30 @@ export async function POST(request: Request) {
   const hour = Number(booking.time.slice(0, 2));
   const when = `${formatDateLong(parseDateKey(booking.date), locale)} · ${formatHour(hour, locale)}`;
 
+  // Guardia contra reservas duplicadas. El caso real no es un doble clic
+  // (de eso se encarga el cerrojo de PaymentStep.tsx) sino la mala señal: la
+  // reserva se crea, la respuesta se pierde en el camino, el cliente no ve
+  // confirmación y vuelve a enviar. Desde el navegador ese segundo intento es
+  // indistinguible de uno legítimo; solo el servidor puede reconocerlo.
+  //
+  // La llave natural es "esta persona ya tiene este horario": mismo correo,
+  // misma fecha, misma hora. Dos reservas así no pueden ser ambas válidas —
+  // sería el mismo cliente ocupando el mismo turno dos veces.
+  const { data: yaExiste } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("contact_email", contact.email)
+    .eq("date", booking.date)
+    .eq("time", booking.time)
+    .limit(1);
+
+  if (yaExiste && yaExiste.length > 0) {
+    // Se responde ok, no error: desde el punto de vista del cliente su
+    // reserva existe, que es exactamente lo que quería. Y no se reenvían los
+    // correos, que es lo que delataba el duplicado.
+    return Response.json({ ok: true, duplicada: true });
+  }
+
   const { error } = await supabase.from("bookings").insert({
     status: "reservado",
     service_type: selection.serviceType,
