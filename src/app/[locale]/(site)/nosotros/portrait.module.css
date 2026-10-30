@@ -1,36 +1,40 @@
 /* El retrato no debe leerse como una foto recortada y pegada encima de la
-   página — "una pancarta colgando". La máscara elíptica disuelve los cuatro
-   bordes hacia transparente, así el fondo borgoña de la foto se funde con el
-   blanco de la página en vez de cortarse contra una línea dura.
+   página — "una pancarta colgando". Los cuatro bordes se disuelven hacia
+   transparente para que se funda con el blanco.
 
-   Los radios son lo que hay que entender antes de tocarlos. La mitad del
-   ancho de la caja es 50%, así que un radio horizontal MAYOR a 50% deja el
-   degradado a medio camino cuando la imagen se acaba, y los laterales quedan
-   cortados en recto. Probado con 78%: las esquinas se fundían bien pero los
-   lados seguían duros. Con 50% exacto, la transparencia cae justo en el
-   borde, que es lo que se busca.
+   POR QUÉ NO ES UNA ELIPSE (ya se probó y falló, no volver a intentarlo):
+   una máscara `radial-gradient(ellipse …)` tiene dos defectos acá.
+   1. La curva del óvalo se mete dentro de la foto en el centro-abajo y
+      borra las manos, que es justo contenido que importa.
+   2. Para que los lados lleguen a transparente hace falta radio horizontal
+      50%, pero entonces el radio vertical queda mayor que la distancia al
+      borde de arriba y de abajo, así que ahí el degradado se corta a mitad
+      de camino y deja una línea dura. El resultado se lee como una vasija:
+      lados difuminados, tapa y base marcadas.
 
-   El centro está por encima de la mitad (44%) a propósito: el rostro vive en
-   la parte alta de la toma, así que la zona opaca cae sobre la cara y las
-   manos, y lo que se disuelve es el techo, la mesa y las esquinas.
+   La forma correcta es un rectángulo de bordes blandos: dos degradados
+   RECTOS (uno horizontal, uno vertical) combinados con `mask-composite`.
+   Cada uno es opaco en el medio y transparente en sus dos extremos;
+   al intersecarlos queda opaco solo donde los dos lo son, o sea el centro,
+   y se desvanece parejo en los cuatro lados sin tocar el medio.
 
-   El 55% es dónde arranca el desvanecido. Más alto deja un borde más
-   marcado; más bajo se empieza a comer la cara.
+   Los porcentajes están elegidos contra el contenido real de esta foto: la
+   cabeza arranca cerca del 10% de altura y las manos terminan cerca del 89%,
+   así que las bandas que se desvanecen caen sobre pared, techo y mesa —
+   nunca sobre ella. Si algún día se cambia la foto, hay que revisarlos.
 
-   `-webkit-mask-image` va además del estándar por Safari de iOS anterior a
-   15.4, que acá es tráfico real: la mayoría entra desde el teléfono. Sin el
-   prefijo esos navegadores ignoran la máscara y la foto vuelve a verse como
-   un rectángulo duro — se degrada sin romperse, pero es justo lo que se
-   quiere evitar. */
+   El bloque `-webkit-` va además del estándar por Safari de iOS anterior a
+   15.4, que acá es tráfico real: la mayoría entra desde el teléfono. Ojo que
+   la sintaxis vieja usa otra palabra (`source-in`) para lo que el estándar
+   llama `intersect`. */
 .retrato {
-  -webkit-mask-image: radial-gradient(
-    ellipse 50% 62% at 50% 44%,
-    #000 55%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 50% 62% at 50% 44%,
-    #000 55%,
-    transparent 100%
-  );
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 12%, #000 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 12%, #000 90%, transparent 100%);
+  mask-composite: intersect;
 }
