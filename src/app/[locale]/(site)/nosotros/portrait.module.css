@@ -1,0 +1,36 @@
+/* El retrato no debe leerse como una foto recortada y pegada encima de la
+   página — "una pancarta colgando". La máscara elíptica disuelve los cuatro
+   bordes hacia transparente, así el fondo borgoña de la foto se funde con el
+   blanco de la página en vez de cortarse contra una línea dura.
+
+   Los radios son lo que hay que entender antes de tocarlos. La mitad del
+   ancho de la caja es 50%, así que un radio horizontal MAYOR a 50% deja el
+   degradado a medio camino cuando la imagen se acaba, y los laterales quedan
+   cortados en recto. Probado con 78%: las esquinas se fundían bien pero los
+   lados seguían duros. Con 50% exacto, la transparencia cae justo en el
+   borde, que es lo que se busca.
+
+   El centro está por encima de la mitad (44%) a propósito: el rostro vive en
+   la parte alta de la toma, así que la zona opaca cae sobre la cara y las
+   manos, y lo que se disuelve es el techo, la mesa y las esquinas.
+
+   El 55% es dónde arranca el desvanecido. Más alto deja un borde más
+   marcado; más bajo se empieza a comer la cara.
+
+   `-webkit-mask-image` va además del estándar por Safari de iOS anterior a
+   15.4, que acá es tráfico real: la mayoría entra desde el teléfono. Sin el
+   prefijo esos navegadores ignoran la máscara y la foto vuelve a verse como
+   un rectángulo duro — se degrada sin romperse, pero es justo lo que se
+   quiere evitar. */
+.retrato {
+  -webkit-mask-image: radial-gradient(
+    ellipse 50% 62% at 50% 44%,
+    #000 55%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 50% 62% at 50% 44%,
+    #000 55%,
+    transparent 100%
+  );
+}
