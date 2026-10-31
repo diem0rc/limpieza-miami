@@ -1,31 +1,61 @@
 /* El retrato no debe leerse como una foto recortada y pegada encima de la
-   página — "una pancarta colgando". Los cuatro bordes se disuelven hacia
-   transparente para que se funda con el blanco.
+   página — "una pancarta colgando". Se resuelve con DOS capas de la misma
+   imagen: un halo borroso que se derrama hacia afuera, y encima la foto
+   nítida con los bordes apenas suavizados.
 
-   POR QUÉ NO ES UNA ELIPSE (ya se probó y falló, no volver a intentarlo):
-   una máscara `radial-gradient(ellipse …)` tiene dos defectos acá.
-   1. La curva del óvalo se mete dentro de la foto en el centro-abajo y
-      borra las manos, que es justo contenido que importa.
-   2. Para que los lados lleguen a transparente hace falta radio horizontal
-      50%, pero entonces el radio vertical queda mayor que la distancia al
-      borde de arriba y de abajo, así que ahí el degradado se corta a mitad
-      de camino y deja una línea dura. El resultado se lee como una vasija:
-      lados difuminados, tapa y base marcadas.
+   POR QUÉ DOS CAPAS, Y NO SOLO UNA MÁSCARA MÁS ANCHA:
+   el desvanecido solo se ve donde hay píxeles de foto, así que ensancharlo
+   obliga a comerse contenido. Acá el contenido llega muy cerca del borde —
+   el brazo al 88% del ancho, las manos al 89% del alto— de modo que la
+   máscara de la foto nítida no puede pasar de ~10% sin borrarle las manos.
+   El halo resuelve eso por el otro lado: agranda y desenfoca una copia, la
+   corre hacia afuera del marco y la apaga. El color se disuelve en la página
+   a lo largo de mucha más distancia sin tocar un solo píxel del contenido.
+   (Agregarle margen transparente al archivo no sirve: sobre el margen no hay
+   nada que desvanecer, y correr el degradado hacia afuera devuelve la línea
+   dura en el borde real de la foto.)
 
-   La forma correcta es un rectángulo de bordes blandos: dos degradados
-   RECTOS (uno horizontal, uno vertical) combinados con `mask-composite`.
-   Cada uno es opaco en el medio y transparente en sus dos extremos;
-   al intersecarlos queda opaco solo donde los dos lo son, o sea el centro,
-   y se desvanece parejo en los cuatro lados sin tocar el medio.
+   POR QUÉ NO UNA ELIPSE (ya se probó y falló, no reintentar): la curva del
+   óvalo se mete en el centro-abajo y borra las manos; y para que los lados
+   lleguen a transparente hace falta radio horizontal 50%, con lo cual el
+   vertical queda mayor que la distancia a los bordes de arriba y abajo y el
+   degradado se corta a mitad de camino. Se lee como una vasija: lados
+   difuminados, tapa y base marcadas. */
 
-   Los porcentajes están elegidos contra el contenido real de esta foto: la
-   cabeza arranca cerca del 10% de altura y las manos terminan cerca del 89%,
-   así que las bandas que se desvanecen caen sobre pared, techo y mesa —
-   nunca sobre ella. Si algún día se cambia la foto, hay que revisarlos.
+.marco {
+  position: relative;
+}
 
-   El bloque `-webkit-` va además del estándar por Safari de iOS anterior a
-   15.4, que acá es tráfico real: la mayoría entra desde el teléfono. Ojo que
-   la sintaxis vieja usa otra palabra (`source-in`) para lo que el estándar
+/* Copia agrandada, desenfocada y apagada que asoma por fuera del marco. Es
+   lo que hace de "halo": al estar detrás y desbordar, la foto nítida ya no
+   termina contra el blanco sino contra su propio color difuminado.
+   `scale` desborda sin empujar el layout, que es la razón de usarlo en
+   lugar de un tamaño mayor. */
+.halo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.18);
+  filter: blur(30px);
+  opacity: 0.55;
+  /* Se apaga desde el centro hacia afuera, llegando a transparente recién
+     en el 100% — o sea en el borde de su propia caja, que gracias al
+     `scale` cae por fuera de la foto. Un valor menor (se probó 85%) apaga
+     el halo ANTES de ese borde y entonces no asoma: no se ve nada.
+     Acá sí conviene una elipse, porque esta capa no tiene contenido que
+     proteger: solo aporta color. */
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 35%, transparent 100%);
+}
+
+/* La foto nítida. Conserva un desvanecido corto en los cuatro bordes para
+   que no haya un corte seco contra el halo; el grueso de la transición la
+   hace el halo. Dos degradados rectos intersecados, no una elipse: así el
+   centro queda intacto y el desvanecido cae parejo en los cuatro lados.
+   El bloque `-webkit-` va por Safari de iOS anterior a 15.4 —acá es tráfico
+   real— y ojo que la sintaxis vieja llama `source-in` a lo que el estándar
    llama `intersect`. */
 .retrato {
   -webkit-mask-image:

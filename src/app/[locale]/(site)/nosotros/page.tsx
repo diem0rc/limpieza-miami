@@ -51,16 +51,29 @@ function About() {
           </p>
         </div>
 
-        {/* Los bordes difuminados viven en portrait.module.css — ver ahí el
-            porqué de la elipse y del prefijo -webkit. */}
-        <Image
-          src="/images/isabely.jpg"
-          alt={t("portraitAlt")}
-          width={777}
-          height={1100}
-          sizes="(max-width: 768px) 70vw, 380px"
-          className={`${styles.retrato} mx-auto h-auto w-full max-w-[18rem] md:max-w-sm`}
-        />
+        {/* Dos capas de la misma foto: detrás una copia borrosa y agrandada
+            que se derrama hacia afuera y se apaga (el halo), y encima la
+            nítida. El porqué de cada una está en portrait.module.css.
+            Misma `src` en las dos, así que es una sola descarga. */}
+        <div className={`${styles.marco} mx-auto w-full max-w-[18rem] md:max-w-sm`}>
+          <Image
+            src="/images/isabely.jpg"
+            alt=""
+            aria-hidden
+            width={777}
+            height={1100}
+            sizes="(max-width: 768px) 70vw, 380px"
+            className={styles.halo}
+          />
+          <Image
+            src="/images/isabely.jpg"
+            alt={t("portraitAlt")}
+            width={777}
+            height={1100}
+            sizes="(max-width: 768px) 70vw, 380px"
+            className={`${styles.retrato} relative z-10 h-auto w-full`}
+          />
+        </div>
       </div>
 
       <div className="mt-12">
