@@ -52,7 +52,30 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    return [{ source: "/:path*", headers: CABECERAS_DE_SEGURIDAD }];
+    return [
+      { source: "/:path*", headers: CABECERAS_DE_SEGURIDAD },
+      {
+        // Next sirve todo lo de /public con `max-age=0, must-revalidate`, o
+        // sea que los videos del hero (6,4 MB entre los dos) se vuelven a
+        // pedir en cada visita. Para un público que llega por QR desde el
+        // teléfono eso es caro y además innecesario: el contenido no cambia
+        // entre visitas.
+        //
+        // 30 días, no un año: estos archivos SÍ van a cambiar (falta subir
+        // la versión final en 1080p, ver la entrada 19 del CLAUDE.md). Con
+        // `immutable` y un año, quien ya lo tenga cacheado seguiría viendo
+        // el viejo durante meses después del reemplazo.
+        //
+        // IMPORTANTE al reemplazar un video: cambiarle el nombre de archivo
+        // (sala-limpieza-2.mp4, por ejemplo). Si se pisa con el mismo
+        // nombre, los que lo tengan en caché no verán el nuevo hasta que
+        // venzan los 30 días.
+        source: "/videos/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=2592000" },
+        ],
+      },
+    ];
   },
 };
 
