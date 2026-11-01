@@ -7,7 +7,7 @@ import { setRequestLocale } from "next-intl/server";
 import { BRAND } from "@/config/brand.config";
 import { routing, type Locale } from "@/i18n/routing";
 import { brandCssVariables } from "@/lib/brand-css";
-import { ALLOW_INDEXING } from "@/lib/seo";
+import { ALLOW_INDEXING, SITE_URL } from "@/lib/seo";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -35,6 +35,17 @@ export async function generateMetadata({
       template: `%s · ${BRAND.name}`,
     },
     description: BRAND.tagline[lang],
+    // Base para resolver las URLs relativas de los metadatos.
+    metadataBase: new URL(SITE_URL),
+    // `"./"` se resuelve contra la ruta de CADA página, así que una sola
+    // línea acá produce un canonical distinto en cada una (verificado
+    // comparando /es, /es/precios y /en/precios: los tres distintos).
+    //
+    // Para qué sirve acá: limpieza-miami.vercel.app sirve el mismo sitio en
+    // paralelo al dominio propio. Al ser el canonical una URL absoluta hacia
+    // www.dibasiliomaid.com, esa copia deja de competir como contenido
+    // duplicado y la autoridad queda en un solo lado.
+    alternates: { canonical: "./" },
     // El `noindex` es lo que de verdad mantiene el sitio fuera de Google
     // mientras la marca esté en placeholder; robots.txt solo pide que no lo
     // rastreen. Se hereda en todas las páginas. Ver src/lib/seo.ts.
