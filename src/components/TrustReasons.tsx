@@ -25,6 +25,33 @@ function hash(seed: number): number {
   return x - Math.floor(x);
 }
 
+/**
+ * Redondea antes de que el número entre en un `style` inline. No es
+ * cosmético ni un detalle de peso de archivo: evita un desajuste de
+ * hidratación real.
+ *
+ * El CSSOM del navegador conserva solo 6 CIFRAS SIGNIFICATIVAS. Si el
+ * servidor manda `left:5.712064806069975%`, el DOM devuelve `left: 5.71206%`;
+ * React compara su valor completo contra ese, no coinciden, y descarta el
+ * HTML del servidor de este subárbol para rehacerlo en el cliente (además de
+ * registrar el error en la consola en cada visita a la home).
+ *
+ * Ojo: el problema NO es `hash()` dando resultados distintos en servidor y
+ * cliente — ahí los números son idénticos, que es justo lo que `Math.sin`
+ * en vez de `Math.random` garantiza. Lo que se pierde es precisión al
+ * serializar el CSS.
+ *
+ * 3 decimales dejan todos estos valores (`left`/`top` ≤ 99, `size` ≤ 24) en
+ * 5 cifras significativas como máximo, por debajo del límite, así que
+ * sobreviven el viaje intactos. Visualmente no cambia nada: son centésimas
+ * de porcentaje.
+ *
+ * Si alguien quita el redondeo por parecer innecesario, el error vuelve.
+ */
+function round3(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
 const DUST_PARTICLES: DustParticle[][] = REASONS.map((_, reasonIndex) =>
   Array.from({ length: PARTICLES_PER_REASON }, (_, i) => {
     const col = i % GRID_COLS;
@@ -35,9 +62,9 @@ const DUST_PARTICLES: DustParticle[][] = REASONS.map((_, reasonIndex) =>
     const jitterX = (hash(seed) - 0.5) * cellW * 0.85;
     const jitterY = (hash(seed + 4.71) - 0.5) * cellH * 0.85;
     return {
-      left: clamp(col * cellW + cellW / 2 + jitterX, 1, 99),
-      top: clamp(row * cellH + cellH / 2 + jitterY, 6, 94),
-      size: 14 + hash(seed + 9.13) * 10,
+      left: round3(clamp(col * cellW + cellW / 2 + jitterX, 1, 99)),
+      top: round3(clamp(row * cellH + cellH / 2 + jitterY, 6, 94)),
+      size: round3(14 + hash(seed + 9.13) * 10),
     };
   })
 );
