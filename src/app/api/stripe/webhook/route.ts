@@ -1,5 +1,11 @@
 import type Stripe from "stripe";
 import { sendPaymentReceivedEmail } from "@/lib/email";
+import {
+  createInviteForBooking,
+  inviteHasReview,
+  markInviteEmailed,
+  reviewUrl,
+} from "@/lib/reviews";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -100,6 +106,24 @@ async function onBookingPaid(session: Stripe.Checkout.Session) {
 
   console.info("[webhook] reserva pagada", { bookingId: data.id, importe });
 
+  // Respaldo del link de reseña, dentro del recibo que ya se manda.
+  //
+  // El camino principal es la redirección de Stripe al terminar de pagar
+  // (ver /api/admin/payment-link). Esto cubre al cliente que cerró la pestaña
+  // antes de que lo redirigieran, y a quien pagó por un método que termina de
+  // procesarse más tarde.
+  //
+  // Solo se incluye si esa invitación todavía no tiene reseña: si el cliente
+  // ya reseñó desde la redirección, el recibo no le vuelve a pedir nada.
+  // La carrera inversa (el webhook llega mientras escribe la reseña) es
+  // inofensiva: el link le llega igual y al abrirlo verá "ya recibimos tu
+  // reseña".
+  let reviewLink: string | null = null;
+  const invite = await createInviteForBooking(data.id);
+  if (invite.ok && !(await inviteHasReview(invite.invite.id))) {
+    reviewLink = reviewUrl(invite.invite);
+  }
+
   // Nunca lanza: ver src/lib/email.ts. Un fallo de correo no debe impedir
   // que el webhook responda 200 — Stripe reintentaría el evento sin motivo.
   await sendPaymentReceivedEmail({
@@ -110,5 +134,10 @@ async function onBookingPaid(session: Stripe.Checkout.Session) {
     direccion: data.contact_address,
     importe,
     locale: data.locale === "en" ? "en" : "es",
+    reviewUrl: reviewLink,
   });
+
+  // El recibo lleva el link, así que cuenta como enviado: el panel mostrará
+  // "Enviada el {fecha}" y no parecerá que nunca se le pidió.
+  if (reviewLink && invite.ok) await markInviteEmailed(invite.invite.id);
 }

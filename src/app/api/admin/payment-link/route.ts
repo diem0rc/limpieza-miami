@@ -1,5 +1,6 @@
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { sendPaymentLinkEmail } from "@/lib/email";
+import { createInviteForBooking, reviewUrl } from "@/lib/reviews";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -62,6 +63,30 @@ export async function POST(request: Request) {
     booking_id: booking.id,
   };
 
+  // La invitación de reseña se crea ANTES del link porque su token tiene que
+  // ir dentro de la URL de redirección, y esa URL se fija al crear el link.
+  //
+  // Pero el cobro NUNCA depende de la reseña: si esto falla, se registra y se
+  // sigue sin redirección, y Stripe usa su pantalla de confirmación por
+  // defecto. Un problema con las reseñas no puede dejar al negocio sin poder
+  // cobrar un trabajo ya hecho.
+  //
+  // Nota de privacidad: Stripe guarda esta URL (token incluido) en el objeto
+  // del Payment Link. Es aceptable porque el token solo sirve para dejar una
+  // reseña una vez.
+  let reviewRedirect: string | null = null;
+  const invite = await createInviteForBooking(booking.id);
+  if (invite.ok) {
+    // `?desde=pago` le dice a la página que viene de pagar, para saludar sin
+    // afirmar que el pago ya se confirmó — eso lo decide el webhook.
+    reviewRedirect = `${reviewUrl(invite.invite)}?desde=pago`;
+  } else {
+    console.error(
+      "[admin/payment-link] sin invitación de reseña, el link va sin redirección:",
+      invite.reason,
+    );
+  }
+
   try {
     const link = await stripe.paymentLinks.create({
       line_items: [
@@ -78,6 +103,18 @@ export async function POST(request: Request) {
       ],
       metadata: linkMetadata,
       payment_intent_data: { metadata: linkMetadata },
+      // Forma verificada en los tipos de stripe 22.6.1
+      // (node_modules/stripe/cjs/resources/PaymentLinks.d.ts):
+      // after_completion.type es 'redirect' | 'hosted_confirmation' y la URL
+      // va en after_completion.redirect.url.
+      ...(reviewRedirect
+        ? {
+            after_completion: {
+              type: "redirect" as const,
+              redirect: { url: reviewRedirect },
+            },
+          }
+        : {}),
     });
 
     const { error: updateError } = await supabase

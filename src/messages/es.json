@@ -367,5 +367,47 @@
       "backHome": "Volver al inicio",
       "newBooking": "Hacer otra reserva"
     }
+  },
+
+  "review": {
+    "metaTitle": "Tu opinión",
+    "invalid": {
+      "title": "Este link no es válido",
+      "body": "Puede que esté incompleto o que ya se haya usado. Si quieres contarnos cómo te fue, llámanos al {phone}."
+    },
+    "error": {
+      "title": "Algo falló de nuestro lado",
+      "body": "No pudimos cargar tu reseña ahora mismo. Vuelve a intentarlo en un momento, o llámanos al {phone}."
+    },
+    "done": {
+      "title": "Ya recibimos tu reseña, ¡gracias!",
+      "body": "No hace falta hacer nada más."
+    },
+    "form": {
+      "heading": "Hola {name}, ¿cómo estuvo tu {service}?",
+      "headingDated": "Hola {name}, ¿cómo estuvo tu {service} del {date}?",
+      "fromPayment": "¡Gracias! En unos minutos te llega el recibo por correo.",
+      "ratingLegend": "Tu calificación",
+      "ratingHint": "Toca una estrella",
+      "starLabel": "{count, plural, one {# estrella} other {# estrellas}} de 5",
+      "commentLabel": "¿Algo que quieras contar?",
+      "commentOptional": "opcional",
+      "commentPlaceholder": "Lo que más te gustó, o lo que podemos mejorar.",
+      "counter": "{count} de 1000",
+      "displayNameLabel": "Nombre con el que se publica",
+      "consent": "Acepto que mi reseña se publique en el sitio con este nombre.",
+      "submit": "Enviar reseña",
+      "submitting": "Enviando…",
+      "ratingRequired": "Elige cuántas estrellas.",
+      "consentRequired": "Necesitamos tu permiso para publicarla.",
+      "nameRequired": "Escribe el nombre con el que quieres que aparezca.",
+      "alreadyReviewed": "Ya recibimos tu reseña, ¡gracias!",
+      "genericError": "No se pudo enviar. Intenta de nuevo.",
+      "networkError": "Se perdió la conexión. Intenta de nuevo."
+    },
+    "thanks": {
+      "title": "¡Gracias!",
+      "body": "La revisamos y la publicamos pronto."
+    }
   }
 }

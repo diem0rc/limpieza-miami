@@ -43,6 +43,10 @@
   /* Animación de intro */
   --color-grime: var(--brand-grime);
 
+  /* Estrellas de reseña */
+  --color-star: var(--brand-star);
+  --color-star-empty: var(--brand-star-empty);
+
   /* Forma — lenguaje redondeado, nada de esquinas duras */
   --radius-sm: var(--brand-radius-sm);
   --radius-md: var(--brand-radius-md);

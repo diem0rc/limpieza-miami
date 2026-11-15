@@ -367,5 +367,47 @@
       "backHome": "Back to home",
       "newBooking": "Make another booking"
     }
+  },
+
+  "review": {
+    "metaTitle": "Your review",
+    "invalid": {
+      "title": "This link isn't valid",
+      "body": "It may be incomplete or already used. If you'd like to tell us how it went, call us at {phone}."
+    },
+    "error": {
+      "title": "Something went wrong on our end",
+      "body": "We couldn't load your review right now. Please try again in a moment, or call us at {phone}."
+    },
+    "done": {
+      "title": "We already got your review — thank you!",
+      "body": "Nothing else to do."
+    },
+    "form": {
+      "heading": "Hi {name}, how was your {service}?",
+      "headingDated": "Hi {name}, how was your {service} on {date}?",
+      "fromPayment": "Thank you! Your receipt will arrive by email in a few minutes.",
+      "ratingLegend": "Your rating",
+      "ratingHint": "Tap a star",
+      "starLabel": "{count, plural, one {# star} other {# stars}} out of 5",
+      "commentLabel": "Anything you'd like to share?",
+      "commentOptional": "optional",
+      "commentPlaceholder": "What you liked most, or what we can do better.",
+      "counter": "{count} of 1000",
+      "displayNameLabel": "Name to publish with",
+      "consent": "I agree to have my review published on the site under this name.",
+      "submit": "Send review",
+      "submitting": "Sending…",
+      "ratingRequired": "Please pick a star rating.",
+      "consentRequired": "We need your permission to publish it.",
+      "nameRequired": "Please enter the name you'd like shown.",
+      "alreadyReviewed": "We already got your review — thank you!",
+      "genericError": "We couldn't send it. Please try again.",
+      "networkError": "The connection dropped. Please try again."
+    },
+    "thanks": {
+      "title": "Thank you!",
+      "body": "We'll review it and publish it soon."
+    }
   }
 }

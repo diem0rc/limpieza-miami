@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import CopyLinkButton from "@/components/admin/CopyLinkButton";
+import ManualReviewInvites from "@/components/admin/ManualReviewInvites";
+import ReviewInviteBlock from "@/components/admin/ReviewInviteBlock";
+import type { BookingReviewState, ManualInviteSummary } from "@/lib/review-types";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useAdminToken } from "@/lib/useAdminToken";
 
@@ -16,7 +20,11 @@ interface Booking {
   cuando: string;
   total: number;
   paymentLinkUrl: string | null;
+  resena: BookingReviewState | null;
 }
+
+/** Estados en los que el servicio ya se hizo y tiene sentido pedir reseña. */
+const INVITABLE: Booking["status"][] = ["completado", "link_enviado", "pagado"];
 
 const STATUS_LABEL: Record<Booking["status"], string> = {
   reservado: "Reservado",
@@ -33,28 +41,36 @@ export default function AdminBookingsView() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   const [bookings, setBookings] = useState<Booking[] | null>(null);
+  const [manualInvites, setManualInvites] = useState<ManualInviteSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const load = useCallback(
     async (activeToken: string) => {
       setLoading(true);
       setLoadError(null);
       try {
-        const res = await fetch("/api/admin/bookings", {
-          headers: { Authorization: `Bearer ${activeToken}` },
-        });
+        // Las dos listas en paralelo: así "Actualizar" refresca ambas de una
+        // y no hace falta un segundo `useEffect` para las invitaciones
+        // manuales (que la regla de lint del proyecto complicaría).
+        const [bookingsRes, invitesRes] = await Promise.all([
+          fetch("/api/admin/bookings", {
+            headers: { Authorization: `Bearer ${activeToken}` },
+          }),
+          fetch("/api/admin/review-invites", {
+            headers: { Authorization: `Bearer ${activeToken}` },
+          }),
+        ]);
 
-        if (res.status === 401) {
+        if (bookingsRes.status === 401 || invitesRes.status === 401) {
           setToken(null);
           return;
         }
 
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
+        const data = await bookingsRes.json().catch(() => ({}));
+        if (!bookingsRes.ok) {
           setLoadError(
             data.error === "notConfigured" ? "notConfigured" : "loadFailed",
           );
@@ -62,6 +78,12 @@ export default function AdminBookingsView() {
         }
 
         setBookings(data.bookings ?? []);
+
+        // Las invitaciones manuales no son críticas: si su consulta falla, la
+        // lista de reservas se muestra igual. Sería absurdo dejar al dueño sin
+        // poder cobrar porque la sección de reseñas no cargó.
+        const invitesData = await invitesRes.json().catch(() => ({}));
+        setManualInvites(invitesRes.ok ? (invitesData.invites ?? []) : []);
       } catch {
         setLoadError("network");
       } finally {
@@ -70,6 +92,13 @@ export default function AdminBookingsView() {
     },
     [setToken],
   );
+
+  /** Actualiza el estado de reseña de una sola reserva, sin recargar todo. */
+  const updateResena = useCallback((bookingId: string, next: BookingReviewState) => {
+    setBookings((list) =>
+      (list ?? []).map((b) => (b.id === bookingId ? { ...b, resena: next } : b)),
+    );
+  }, []);
 
   // Carga automática solo la primera vez que aparece un token guardado de una
   // visita anterior. El `ref` evita que se repita en cada render y es lo que
@@ -184,18 +213,6 @@ export default function AdminBookingsView() {
       }));
     } finally {
       setBusyId(null);
-    }
-  }
-
-  async function copyLink(booking: Booking) {
-    if (!booking.paymentLinkUrl) return;
-    try {
-      await navigator.clipboard.writeText(booking.paymentLinkUrl);
-      setCopiedId(booking.id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      // El portapapeles puede fallar sin permiso; el link sigue visible en
-      // pantalla para copiarlo a mano.
     }
   }
 
@@ -322,19 +339,30 @@ export default function AdminBookingsView() {
                   <p className="truncate rounded-md bg-bg-alt px-3 py-2 text-tiny text-text-faint">
                     {b.paymentLinkUrl}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => copyLink(b)}
-                    className="h-11 w-full rounded-pill border-2 border-border-strong text-small font-semibold text-text transition-colors hover:bg-surface-hover"
-                  >
-                    {copiedId === b.id ? "¡Copiado!" : "Copiar link"}
-                  </button>
+                  <CopyLinkButton url={b.paymentLinkUrl} label="Copiar link de pago" />
                 </div>
+              )}
+
+              {INVITABLE.includes(b.status) && (
+                <ReviewInviteBlock
+                  bookingId={b.id}
+                  token={token}
+                  resena={b.resena}
+                  onChange={(next) => updateResena(b.id, next)}
+                  onExpired={() => setToken(null)}
+                />
               )}
             </li>
           );
         })}
       </ul>
+
+      <ManualReviewInvites
+        token={token}
+        invites={manualInvites}
+        onChanged={() => load(token)}
+        onExpired={() => setToken(null)}
+      />
     </div>
   );
 }

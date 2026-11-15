@@ -83,6 +83,16 @@ export const COLORS = {
   // marca del cliente: es un color de efecto, no de identidad.
   grime: '#DDD4C8',
 
+  // Estrellas de reseña. Dorado y gris: la convención universal de los
+  // sistemas de calificación (Google Maps, Amazon, Booking). Tampoco es
+  // parte de la marca del cliente, y aquí NO se usa la paleta de marca a
+  // propósito: una calificación con estrellas celestes o terracota se lee
+  // peor, porque el usuario ya trae aprendido qué significa una estrella
+  // dorada frente a una gris. Es el único sitio del proyecto donde una
+  // convención externa manda sobre la paleta propia.
+  star: '#FBBC04',
+  starEmpty: '#DADCE0',
+
   // Texto sobre botones de acento
   onAccent: '#FFFFFF',
 

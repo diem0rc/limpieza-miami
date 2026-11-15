@@ -3,6 +3,11 @@
   "configurations": [
     {
       "name": "limpieza-miami",
+      "url": "http://localhost:3000",
+      "port": 3000
+    },
+    {
+      "name": "limpieza-miami-arrancar",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000

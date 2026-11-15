@@ -1,4 +1,5 @@
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { listReviewStateByBooking } from "@/lib/reviews";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -32,6 +33,11 @@ export async function GET(request: Request) {
     return Response.json({ error: "dbError" }, { status: 502 });
   }
 
+  // UNA consulta extra para todas las reservas, no una por reserva. Con
+  // decenas de filas en pantalla, preguntar por cada una sería el clásico
+  // N+1: la lista tardaría proporcionalmente a cuántas reservas haya.
+  const reviewState = await listReviewStateByBooking();
+
   const bookings = data.map((b) => ({
     id: b.id,
     status: b.status,
@@ -44,6 +50,7 @@ export async function GET(request: Request) {
     cuando: b.when_label,
     total: b.total_price,
     paymentLinkUrl: b.stripe_payment_link_url,
+    resena: reviewState.get(b.id) ?? null,
   }));
 
   return Response.json({ bookings });

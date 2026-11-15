@@ -116,6 +116,23 @@ async function describeBooking(
   return lines.filter((l) => l !== null).join("\n");
 }
 
+/**
+ * La invitación a reseñar, en una sola frase y en un solo lugar.
+ *
+ * Está centralizada a propósito: la usan el correo de pedido de reseña y el
+ * recibo de pago, y la regla 2 de reseñas exige que el texto sea idéntico
+ * para todos los clientes. Si viviera copiado en dos funciones, un cambio en
+ * una de ellas rompería esa garantía sin que nadie lo notara.
+ *
+ * Tampoco menciona ningún beneficio por reseñar — regla 3, sin incentivos.
+ */
+function reviewLine(url: string, locale: "es" | "en"): string {
+  return {
+    es: `¿Cómo te fue? Cuéntanos en un minuto: ${url}`,
+    en: `How did it go? Tell us in a minute: ${url}`,
+  }[locale];
+}
+
 /** `/api/bookings` la llama justo después de guardar la reserva. Al negocio. */
 export async function sendNewBookingEmail(booking: ParsedBooking, when: string) {
   const body = await describeBooking(booking, when, "es");
@@ -197,7 +214,14 @@ export async function sendPaymentLinkEmail(params: {
   await sendSafely(email, t.subject, [t.intro, "", t.cta, "", t.closing].join("\n"));
 }
 
-/** El webhook la llama cuando un link de pago se cobra. Al negocio y al cliente. */
+/**
+ * El webhook la llama cuando un link de pago se cobra. Al negocio y al cliente.
+ *
+ * `reviewUrl` es opcional y va solo en el correo del cliente: es el respaldo
+ * de la redirección de Stripe, para el cliente que cerró la pestaña antes de
+ * que lo redirigieran. No es un correo extra — es una línea más en el recibo
+ * que ya se manda.
+ */
 export async function sendPaymentReceivedEmail(params: {
   cliente: string;
   email: string;
@@ -206,6 +230,7 @@ export async function sendPaymentReceivedEmail(params: {
   direccion: string;
   importe: number;
   locale: "es" | "en";
+  reviewUrl?: string | null;
 }) {
   const { cliente, email, servicio, cuando, direccion, importe, locale } = params;
 
@@ -234,7 +259,78 @@ export async function sendPaymentReceivedEmail(params: {
     },
   }[locale];
 
-  const customerEmail = sendSafely(email, t.subject, t.body);
+  const customerBody = params.reviewUrl
+    ? [t.body, "", reviewLine(params.reviewUrl, locale)].join("\n")
+    : t.body;
+
+  const customerEmail = sendSafely(email, t.subject, customerBody);
 
   await Promise.all([businessEmail, customerEmail]);
+}
+
+/**
+ * El panel la llama con "Enviar por correo" en el bloque de Reseña. Al
+ * cliente. Mismo texto para todos, sin importar nada del servicio ni del
+ * cliente (reglas 2 y 3 de reseñas).
+ */
+export async function sendReviewRequestEmail(params: {
+  cliente: string;
+  email: string;
+  url: string;
+  locale: "es" | "en";
+}) {
+  const { cliente, email, url, locale } = params;
+
+  const t = {
+    es: {
+      subject: `¿Cómo te fue con nosotros? — ${BRAND.name}`,
+      intro: `Hola ${cliente}, gracias por confiar en ${BRAND.name}.`,
+      closing: `Si prefieres contarnos en privado, respóndenos a ${BRAND.email} o llámanos al ${BRAND.phone}.`,
+    },
+    en: {
+      subject: `How did it go? — ${BRAND.name}`,
+      intro: `Hi ${cliente}, thank you for choosing ${BRAND.name}.`,
+      closing: `If you'd rather tell us privately, reply to ${BRAND.email} or call us at ${BRAND.phone}.`,
+    },
+  }[locale];
+
+  await sendSafely(
+    email,
+    t.subject,
+    [t.intro, "", reviewLine(url, locale), "", t.closing].join("\n"),
+  );
+}
+
+/**
+ * `/api/reviews` la llama cuando entra una reseña. Al negocio.
+ *
+ * Deliberadamente NO cambia según la calificación: ni el asunto, ni el
+ * cuerpo, ni la urgencia. Una reseña de 1 estrella y una de 5 generan el
+ * mismo aviso, porque la moderación tiene que poder ser neutral (regla 1) y
+ * eso empieza por no teñir el aviso que la anuncia.
+ */
+export async function sendNewReviewEmail(params: {
+  rating: number;
+  displayName: string;
+  servicio: string;
+  body: string;
+}) {
+  const { rating, displayName, servicio, body } = params;
+
+  await sendSafely(
+    BRAND.email,
+    `Nueva reseña ${rating}★ de ${displayName} — pendiente de revisar`,
+    [
+      `Entró una reseña nueva. Está pendiente hasta que la revises en /admin/reservas.`,
+      "",
+      `Calificación: ${rating} de 5`,
+      `Nombre a mostrar: ${displayName}`,
+      `Servicio: ${servicio}`,
+      "",
+      body ? `Comentario:\n${body}` : "Sin comentario escrito.",
+      "",
+      `Recuerda: solo se rechaza u oculta por lenguaje ofensivo, datos`,
+      `personales, no hablar del servicio, o spam. Nunca por ser negativa.`,
+    ].join("\n"),
+  );
 }
