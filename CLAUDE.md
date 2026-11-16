@@ -489,16 +489,116 @@ valor de `pricing.config.ts` — pregunta antes: eso sí sería nuevo.
     muestra. Si se agrega contenido de video en otra parte del sitio,
     revisar si aplica el mismo tratamiento.
 
+21. **Fase 7: las reseñas cuelgan de una INVITACIÓN (`review_invites`), no de
+    una reserva.** La primera clienta del negocio llamó por teléfono y no
+    existe en `bookings`. Si el link de reseña colgara de una reserva, esos
+    clientes no podrían reseñar nunca. Con una invitación en medio,
+    `booking_id` puede ser nulo (`source: 'manual'`) y el mismo sistema sirve
+    para los dos casos sin ramas duplicadas.
+    **No hay formulario público abierto.** Solo reseña quien tiene un token
+    (`randomBytes(24).toString('base64url')`), y eso es cumplimiento, no
+    diseño: la regla de la FTC sobre reseñas (16 CFR Part 465, vigente desde
+    octubre de 2024) y la política de reseñas de Google exigen que las
+    reseñas sean de clientes reales. Por eso la insignia "Cliente verificado"
+    de la home es literalmente cierta.
+    **Dos `unique` hacen de guardián, en el mismo espíritu que los
+    `.eq('status', …)` del resto del proyecto:**
+    - `unique(booking_id)` en `review_invites`: dos llamadas simultáneas a
+      `createInviteForBooking` no crean dos invitaciones. Ante el error
+      `23505` se vuelve a leer y se devuelve la que ya existe. Ojo con el
+      matiz de Postgres que hace que esto funcione: `unique` NO bloquea
+      varios `null`, así que las invitaciones manuales (todas con
+      `booking_id` nulo) conviven sin chocar.
+    - `unique(invite_id)` en `reviews`: una reseña por invitación. Un doble
+      toque en "Enviar" con mala señal responde `409 alreadyReviewed` y no
+      manda un aviso duplicado al negocio.
+    **Moderación neutral.** Rechazar u ocultar exige uno de cuatro motivos de
+    una lista cerrada (`MODERATION_REASONS` en `src/lib/review-types.ts`):
+    lenguaje ofensivo, datos personales, no habla del servicio, spam o
+    duplicada. No hay texto libre, y el servidor rechaza cualquier otro valor
+    — verificado mandando `esNegativa` y `pocasEstrellas` directo a la API,
+    las dos `400`. No existe ningún camino en el sistema para quitar una
+    reseña por ser negativa, y esa es justamente la obligación legal.
+    `rechazar` y `ocultar` acaban en el mismo estado y son dos acciones
+    distintas porque el estado del que PARTEN es el guardián: rechazar desde
+    `pendiente`, ocultar desde `publicado`.
+    **Nada de datos estructurados `AggregateRating` / `Review`.** Google no
+    muestra estrellas en los resultados para reseñas que un negocio publica
+    sobre sí mismo en su propio sitio, así que el marcado no ganaría nada y
+    entraría en su definición de marcado engañoso. No lo agregues.
+    **La redirección de Stripe no confirma el pago.** Al pagar el Payment
+    Link, Stripe lleva al cliente a `/{locale}/resena/{token}?desde=pago` —
+    el momento en que más probable es que deje la reseña. Pero la
+    confirmación autoritativa del cobro sigue siendo el webhook: el cliente
+    puede cerrar la pestaña antes de que lo redirijan, y algunos métodos de
+    pago terminan de procesarse después. Por eso la página no toca el estado
+    de la reserva y el texto de `?desde=pago` dice "en unos minutos te llega
+    el recibo", sin afirmar que el pago se confirmó.
+    **El cobro NUNCA depende de la reseña.** Si crear la invitación falla,
+    `/api/admin/payment-link` lo registra y crea el link igual, sin
+    redirección. Esto se verificó sin querer en una prueba con un
+    `service_type` inválido: el link se generó, el negocio pudo cobrar, y
+    solo se perdió la redirección. Nada de reseñas puede impedir cobrar un
+    trabajo ya hecho.
+    **Nota de privacidad:** Stripe guarda la URL de redirección —token
+    incluido— dentro del objeto del Payment Link. Es aceptable porque ese
+    token solo sirve para dejar una reseña una vez.
+
+22. **La sección de reseñas de la home se cachea con `unstable_cache` y se
+    invalida a mano al moderar.** La home TIENE que seguir siendo estática
+    (`●` en el build): es la página que recibe el tráfico de los códigos QR.
+    Una consulta a Supabase al renderizar la volvería dinámica (`ƒ`) y cada
+    visita pagaría una ida y vuelta a la base de datos.
+    `getPublishedReviews()` (en `src/lib/reviews.ts`) envuelve la lectura en
+    `unstable_cache` con la etiqueta `REVIEWS_CACHE_TAG`, y
+    `/api/admin/reviews/[id]` llama a `revalidateTag(REVIEWS_CACHE_TAG,
+    "max")` al publicar u ocultar — no al rechazar, porque una pendiente
+    nunca estuvo en la web.
+    Tres cosas que cuesta deducir y que conviene no volver a investigar:
+    - **La forma de un solo argumento (`revalidateTag(tag)`) está obsoleta en
+      Next 16.** La vigente lleva un segundo argumento con el perfil.
+    - **`"max"` no vacía la caché al instante.** La marca como vencida: la
+      siguiente petición recibe TODAVÍA la versión anterior y dispara la
+      regeneración por detrás; la siguiente ya trae lo nuevo. Medido en
+      local. Consecuencia práctica para el dueño: tras publicar una reseña,
+      puede que tenga que recargar la home una vez para verla. Se eligió así
+      a propósito — la alternativa (`{ expire: 0 }`) haría esperar al primer
+      visitante que entre después de moderar, y hacer esperar a un cliente
+      potencial es peor que una recarga del dueño.
+    - **No se usa la directiva `use cache`** porque necesita
+      `cacheComponents: true` en `next.config.ts`, que cambia el modelo de
+      caché de todo el proyecto. No se activa por una sección.
+    `unstable_cache` no lleva `revalidate`: la caché no vence sola. Las
+    reseñas no cambian con el tiempo, cambian cuando alguien las modera, y
+    ese momento se conoce exactamente.
+    Si no hay ninguna reseña publicada, la sección **no renderiza nada** — ni
+    encabezado ni estado vacío. Y si Supabase no está configurado en el
+    build, `getSupabaseAdmin()` devuelve `null`, la sección desaparece y el
+    build no falla.
+
 # Estado real de la infraestructura
 
-- **Hay base de datos: Supabase, desde la fase 6.** Tabla `bookings` (ver
-  entrada 17 de decisiones), con RLS activo y sin políticas — todo el acceso
-  pasa por el servidor con la clave "secret". El esquema (SQL de creación de
-  la tabla) no vive en el repo como migración versionada todavía — se corrió
-  una vez a mano en el SQL Editor del dashboard de Supabase; si hace falta
-  otra columna, es un `alter table` ahí, no un archivo que buscar aquí.
+- **Hay base de datos: Supabase.** Tres tablas: `bookings` (fase 6, entrada
+  17 de decisiones) y `review_invites` + `reviews` (fase 7, entrada 21). Las
+  tres con RLS activo y **sin políticas** — todo el acceso pasa por el
+  servidor con la clave "secret", el navegador nunca las toca.
+  El esquema está a medias en cuanto a versionado, y conviene saber cuál es
+  cuál: el `create table bookings` original **no** está en el repo (se corrió
+  a mano en el SQL Editor del dashboard), pero el de la fase 7 **sí**, en
+  `supabase/sql/2026-11-fase7-resenas.sql`. Ese archivo es el primero de
+  esquema del repo y lleva en comentarios el porqué de cada columna. Para
+  una columna nueva: un `alter table` en el SQL Editor, y si toca las tablas
+  de reseñas, añadirlo también a ese archivo.
 - **Auth también es de Supabase**, un solo usuario (el dueño,
   `dibasiliomaid@gmail.com`), creado desde el dashboard — ver entrada 9.
+- **Las reseñas están completas y verificadas de punta a punta** (fase 7):
+  invitación desde una reserva web o a mano para un cliente telefónico →
+  página pública `/{locale}/resena/{token}` → moderación en
+  `/admin/reservas` → sección en la home. Probado con reseñas reales en
+  local, incluida la redirección de Stripe tras un pago en modo test, el
+  webhook, los guardianes de cada transición y el doble clic (200 + 409).
+  Todos los datos de prueba se borraron: `review_invites` y `reviews`
+  quedaron en cero.
 - **Los avisos por correo** (`src/lib/email.ts`, Resend) van al negocio
   (siempre) y al cliente (desde la fase 6, ver entrada 14) — **los 5 correos
   del flujo completo ya están verificados con envío real** en producción:
@@ -514,7 +614,10 @@ valor de `pricing.config.ts` — pregunta antes: eso sí sería nuevo.
   llegar un correo.
 - **Stripe, Supabase y el panel interno tienen claves reales configuradas**,
   tanto en `.env.local` como en Vercel (producción): `STRIPE_SECRET_KEY`
-  (modo **test**, `sk_test_...`, sin mover dinero real), `STRIPE_WEBHOOK_SECRET`
+  (**en Vercel está en modo VIVO, `sk_live_...`: mueve dinero real** — esto
+  cambió el 2026-11-15 y antes este archivo decía, mal, que era de prueba;
+  en `.env.local` hay una `sk_test_...` para probar en local sin cobrar
+  nada), `STRIPE_WEBHOOK_SECRET`
   (endpoint real en el dashboard de Stripe, apuntando a
   `https://limpieza-miami.vercel.app/api/stripe/webhook`), `SUPABASE_URL` +
   `SUPABASE_SERVICE_ROLE_KEY` + `NEXT_PUBLIC_SUPABASE_URL` +
@@ -562,7 +665,9 @@ En la salida del build, **todas las páginas del sitio deben quedar como SSG
 (`●`) en ambos idiomas**. Si alguna aparece como dinámica (`ƒ`) sin motivo,
 suele faltar `setRequestLocale(locale)` en un layout o página — incluidos los
 layouts de grupo `(site)` y `(booking)`. Las únicas rutas dinámicas legítimas
-son `/api/*` y `/reservar/confirmacion`.
+son `/api/*` y `/resena/[token]` (una página por token: no se puede
+prerenderizar). `/reservar/confirmacion` aparecía en esta lista y ya no hace
+falta — el build la da como SSG en los dos idiomas.
 
 # Decisión tomada: nada de bloques autogenerados aquí
 

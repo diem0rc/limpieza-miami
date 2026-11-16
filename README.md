@@ -157,6 +157,11 @@ reenviar correos de más.
 | `POST /api/admin/bookings/[id]/complete`       | `reservado` → `completado`                             |
 | `POST /api/admin/payment-link`                 | Genera el link, `completado` → `link_enviado`          |
 | `POST /api/stripe/webhook`                     | `link_enviado` → `pagado` cuando el link se cobra      |
+| `POST /api/admin/review-invites`               | Crea la invitación de reseña (de reserva o manual)     |
+| `POST /api/admin/review-invites/[id]/email`    | Manda el link de reseña por correo                     |
+| `GET /api/admin/reviews`                       | Reseñas pendientes y publicadas, para moderar          |
+| `POST /api/admin/reviews/[id]`                 | `publicar` / `rechazar` / `ocultar`, con motivo        |
+| `POST /api/reviews`                            | Pública: recibe la reseña de un token válido           |
 | `/admin/reservas`                              | La pantalla que junta las rutas de arriba              |
 
 El acceso a `/admin/reservas` es **Supabase Auth**, un solo usuario (el dueño

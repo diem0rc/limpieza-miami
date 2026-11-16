@@ -408,6 +408,12 @@
     "thanks": {
       "title": "¡Gracias!",
       "body": "La revisamos y la publicamos pronto."
+    },
+    "section": {
+      "title": "Lo que dicen nuestros clientes",
+      "summary": "{average} de 5 · {total, plural, one {# reseña} other {# reseñas}}",
+      "verified": "Cliente verificado",
+      "stars": "{rating} de 5 estrellas"
     }
   }
 }

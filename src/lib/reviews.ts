@@ -1,5 +1,6 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
+import { unstable_cache } from "next/cache";
 import type {
   AdminReview,
   BookingReviewState,
@@ -562,3 +563,100 @@ export async function moderateReview(
 
   return { ok: false, reason: actual ? "conflict" : "notFound" };
 }
+
+// ---------------------------------------------------------------------------
+// La sección pública de la home (parte 3)
+// ---------------------------------------------------------------------------
+
+export interface PublishedReview {
+  id: string;
+  rating: number;
+  body: string;
+  displayName: string;
+  serviceType: string;
+  locale: ReviewLocale;
+  publishedAt: string;
+}
+
+export interface PublishedReviews {
+  /** Todas las publicadas, no solo las que se muestran. */
+  total: number;
+  /** Promedio sobre ese mismo total, con un decimal. 0 si no hay ninguna. */
+  average: number;
+  /** Las 6 más recientes, para pintar. */
+  latest: PublishedReview[];
+}
+
+const VACIO: PublishedReviews = { total: 0, average: 0, latest: [] };
+
+/** Cuántas tarjetas se pintan. El promedio NO se calcula sobre estas. */
+const EN_PANTALLA = 6;
+
+async function loadPublishedReviews(): Promise<PublishedReviews> {
+  const supabase = getSupabaseAdmin();
+  // En un build sin claves de Supabase esto es `null`, la sección no se
+  // renderiza y el build no falla. Es el mismo criterio que el resto del
+  // proyecto: una pieza que no se puede cargar desaparece, no rompe la página.
+  if (!supabase) return VACIO;
+
+  // Se traen TODAS las publicadas, no solo las seis que se ven, porque el
+  // promedio y el total tienen que salir de todas (regla 5). Son pocas filas
+  // y el índice (status, published_at desc) las entrega ya ordenadas; si
+  // algún día fueran miles, esto se parte en una consulta de agregado más
+  // otra de seis filas.
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("id, rating, body, display_name, service_type, locale, published_at")
+    .eq("status", "publicado")
+    .order("published_at", { ascending: false });
+
+  if (error) {
+    console.error("[reviews] no se pudieron leer las publicadas:", error);
+    return VACIO;
+  }
+
+  const filas = data ?? [];
+  if (filas.length === 0) return VACIO;
+
+  const suma = filas.reduce((acc, r) => acc + Number(r.rating), 0);
+
+  return {
+    total: filas.length,
+    average: Math.round((suma / filas.length) * 10) / 10,
+    latest: filas.slice(0, EN_PANTALLA).map((r) => ({
+      id: String(r.id),
+      rating: Number(r.rating),
+      body: typeof r.body === "string" ? r.body : "",
+      displayName: String(r.display_name ?? ""),
+      serviceType: String(r.service_type ?? ""),
+      locale: normalizeLocale(r.locale),
+      publishedAt: String(r.published_at ?? ""),
+    })),
+  };
+}
+
+/**
+ * La misma lectura, cacheada, para que la home siga siendo estática.
+ *
+ * Sin esto, consultar Supabase al renderizar la home la volvería dinámica
+ * (`ƒ` en el build) y cada visita pagaría una ida y vuelta a la base de
+ * datos. Con `unstable_cache` el resultado se calcula una vez y se guarda
+ * bajo la etiqueta `REVIEWS_CACHE_TAG`.
+ *
+ * No se le pone `revalidate`: la caché no vence sola, a propósito. Las
+ * reseñas no cambian con el tiempo, cambian cuando alguien las modera, y ese
+ * momento se conoce exactamente — `/api/admin/reviews/[id]` llama a
+ * `revalidateTag` al publicar u ocultar. Una revalidación por tiempo sería
+ * peor de las dos maneras: la home se quedaría desactualizada hasta una hora
+ * después de publicar, y consultaría la base de datos cada hora aunque no
+ * hubiera cambiado nada.
+ *
+ * `unstable_cache` y no la directiva `use cache`: esta última necesita
+ * `cacheComponents: true` en `next.config.ts`, que es un cambio de modelo de
+ * caché para todo el proyecto. No tiene sentido activarlo por una sección.
+ */
+export const getPublishedReviews = unstable_cache(
+  loadPublishedReviews,
+  ["resenas-publicadas-home"],
+  { tags: [REVIEWS_CACHE_TAG] },
+);

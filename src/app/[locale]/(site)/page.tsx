@@ -7,6 +7,7 @@ import IntroAnimation from "@/components/IntroAnimation";
 import CleaningScrollVideo from "@/components/CleaningScrollVideo";
 import TrustReasons from "@/components/TrustReasons";
 import ServicesCarousel from "@/components/ServicesCarousel";
+import ReviewsSection from "@/components/ReviewsSection";
 
 export default async function HomePage({
   params,
@@ -61,6 +62,10 @@ function Home() {
           </ol>
         </Container>
       </section>
+
+      {/* Reseñas — la prueba social justo antes de pedir la reserva. No
+          renderiza nada mientras no haya ninguna publicada. */}
+      <ReviewsSection />
 
       {/* CTA final */}
       <section>

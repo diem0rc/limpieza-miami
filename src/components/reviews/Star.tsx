@@ -61,9 +61,39 @@ export function StarRow({
 }) {
   return (
     <span role="img" aria-label={label} className="inline-flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} filled={n <= rating} className={size} />
-      ))}
+      {[1, 2, 3, 4, 5].map((n) => {
+        // Cuánto de ESTA estrella corresponde pintar: 1 entera, 0 vacía, o
+        // algo intermedio. Las calificaciones de una reseña son enteras y
+        // nunca entran por el caso de en medio; el promedio de la home sí.
+        const parte = Math.min(Math.max(rating - (n - 1), 0), 1);
+        if (parte >= 0.75) return <Star key={n} filled className={size} />;
+        if (parte < 0.25) return <Star key={n} filled={false} className={size} />;
+        return <HalfStar key={n} size={size} />;
+      })}
+    </span>
+  );
+}
+
+/**
+ * Media estrella, para un promedio como 4.5.
+ *
+ * Sin esto habría que redondear, y redondear hacia arriba pinta cinco
+ * estrellas llenas junto al texto "4.5 de 5" — el sitio diciendo dos cosas
+ * distintas a la vez, y la de más peso visual exagerando. Redondear hacia
+ * abajo sería honesto pero mezquino con un 4.9.
+ *
+ * Es la estrella vacía con la llena encima, recortada a la mitad por un
+ * contenedor con `overflow-hidden`. Se hace así y no con un degradado
+ * dentro del SVG porque el recorte no depende de que el navegador resuelva
+ * `objectBoundingBox` igual en todas partes.
+ */
+function HalfStar({ size }: { size: string }) {
+  return (
+    <span className="relative inline-flex">
+      <Star filled={false} className={size} />
+      <span className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+        <Star filled className={size} />
+      </span>
     </span>
   );
 }
