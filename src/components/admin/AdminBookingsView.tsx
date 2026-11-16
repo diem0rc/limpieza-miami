@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import CopyLinkButton from "@/components/admin/CopyLinkButton";
 import ManualReviewInvites from "@/components/admin/ManualReviewInvites";
 import ReviewInviteBlock from "@/components/admin/ReviewInviteBlock";
-import type { BookingReviewState, ManualInviteSummary } from "@/lib/review-types";
+import ReviewsModeration from "@/components/admin/ReviewsModeration";
+import type {
+  AdminReview,
+  BookingReviewState,
+  ManualInviteSummary,
+} from "@/lib/review-types";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useAdminToken } from "@/lib/useAdminToken";
 
@@ -42,6 +47,10 @@ export default function AdminBookingsView() {
 
   const [bookings, setBookings] = useState<Booking[] | null>(null);
   const [manualInvites, setManualInvites] = useState<ManualInviteSummary[]>([]);
+  const [reviews, setReviews] = useState<{
+    pendientes: AdminReview[];
+    publicadas: AdminReview[];
+  }>({ pendientes: [], publicadas: [] });
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -55,16 +64,23 @@ export default function AdminBookingsView() {
         // Las dos listas en paralelo: así "Actualizar" refresca ambas de una
         // y no hace falta un segundo `useEffect` para las invitaciones
         // manuales (que la regla de lint del proyecto complicaría).
-        const [bookingsRes, invitesRes] = await Promise.all([
+        const [bookingsRes, invitesRes, reviewsRes] = await Promise.all([
           fetch("/api/admin/bookings", {
             headers: { Authorization: `Bearer ${activeToken}` },
           }),
           fetch("/api/admin/review-invites", {
             headers: { Authorization: `Bearer ${activeToken}` },
           }),
+          fetch("/api/admin/reviews", {
+            headers: { Authorization: `Bearer ${activeToken}` },
+          }),
         ]);
 
-        if (bookingsRes.status === 401 || invitesRes.status === 401) {
+        if (
+          bookingsRes.status === 401 ||
+          invitesRes.status === 401 ||
+          reviewsRes.status === 401
+        ) {
           setToken(null);
           return;
         }
@@ -84,6 +100,19 @@ export default function AdminBookingsView() {
         // poder cobrar porque la sección de reseñas no cargó.
         const invitesData = await invitesRes.json().catch(() => ({}));
         setManualInvites(invitesRes.ok ? (invitesData.invites ?? []) : []);
+
+        // Mismo criterio que arriba: la moderación tampoco es crítica para
+        // cobrar. Si su consulta falla, la sección de reseñas desaparece y la
+        // lista de reservas sigue funcionando.
+        const reviewsData = await reviewsRes.json().catch(() => ({}));
+        setReviews(
+          reviewsRes.ok
+            ? {
+                pendientes: reviewsData.pendientes ?? [],
+                publicadas: reviewsData.publicadas ?? [],
+              }
+            : { pendientes: [], publicadas: [] },
+        );
       } catch {
         setLoadError("network");
       } finally {
@@ -288,6 +317,17 @@ export default function AdminBookingsView() {
             : "No se pudo cargar la lista. Intenta de nuevo."}
         </p>
       )}
+      {/* Arriba del todo: lo que espera una decisión. Una reseña pendiente
+          es trabajo que el cliente ya hizo y que no se ve en la web hasta
+          que alguien la mire; las reservas, en cambio, siguen ahí mañana. */}
+      <ReviewsModeration
+        token={token}
+        pendientes={reviews.pendientes}
+        publicadas={reviews.publicadas}
+        onChanged={() => load(token)}
+        onExpired={() => setToken(null)}
+      />
+
       {bookings && bookings.length === 0 && !loading && (
         <p className="mt-6 text-body text-text-muted">No hay reservas activas.</p>
       )}

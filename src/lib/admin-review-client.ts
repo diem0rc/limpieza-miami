@@ -1,4 +1,9 @@
-import type { ManualInviteSummary } from "@/lib/review-types";
+import type {
+  AdminReview,
+  ManualInviteSummary,
+  ModerationAction,
+  ModerationReason,
+} from "@/lib/review-types";
 
 /**
  * Llamadas del panel al API de reseñas, desde el navegador.
@@ -100,5 +105,66 @@ export async function createManualInviteRequest(
     return { ok: true, invite: { id: data.id, url: data.url } };
   } catch {
     return { ok: false, kind: "network" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Moderación (parte 2)
+// ---------------------------------------------------------------------------
+
+/**
+ * `expired` queda fuera de esta lista porque no es un fallo que se le cuente
+ * al dueño: significa que la sesión caducó, y el panel reacciona volviendo a
+ * pedir login en vez de mostrando un mensaje de error.
+ */
+export type ModerationFailureKind = "conflict" | "notFound" | "failed" | "network";
+
+export type ModerateOutcome =
+  | { ok: true; review: AdminReview }
+  | { ok: false; kind: "expired" | ModerationFailureKind };
+
+export async function moderateReviewRequest(
+  id: string,
+  action: ModerationAction,
+  reason: ModerationReason | null,
+  token: string,
+): Promise<ModerateOutcome> {
+  try {
+    const res = await fetch(`/api/admin/reviews/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action, reason }),
+    });
+
+    if (res.status === 401) return { ok: false, kind: "expired" };
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 409) return { ok: false, kind: "conflict" };
+    if (res.status === 404) return { ok: false, kind: "notFound" };
+    if (!res.ok || !data.review) return { ok: false, kind: "failed" };
+
+    return { ok: true, review: data.review as AdminReview };
+  } catch {
+    return { ok: false, kind: "network" };
+  }
+}
+
+/** El mensaje que ve el dueño cuando una decisión de moderación no se aplica. */
+export function describeModerationFailure(kind: ModerationFailureKind): string {
+  switch (kind) {
+    case "conflict":
+      // El caso real: dos pestañas abiertas, o un segundo clic que llegó
+      // cuando el primero ya había cambiado el estado.
+      return "Esta reseña ya cambió de estado. Actualiza para ver cómo quedó.";
+    case "notFound":
+      return "Esta reseña ya no existe.";
+    case "network":
+      return "Se perdió la conexión. Actualiza antes de reintentar.";
+    default:
+      return "No se pudo aplicar. Intenta de nuevo.";
   }
 }

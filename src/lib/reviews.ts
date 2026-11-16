@@ -1,8 +1,11 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import type {
+  AdminReview,
   BookingReviewState,
   ManualInviteSummary,
+  ModerationAction,
+  ModerationReason,
   ReviewLocale,
   ReviewStatus,
 } from "@/lib/review-types";
@@ -393,4 +396,169 @@ function embeddedReviewStatus(raw: unknown): ReviewStatus | null {
   if (!row || typeof row !== "object") return null;
   const status = (row as { status?: unknown }).status;
   return typeof status === "string" ? (status as ReviewStatus) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Moderación (parte 2)
+// ---------------------------------------------------------------------------
+
+/**
+ * La etiqueta de caché de la sección de reseñas de la home.
+ *
+ * Vive acá, junto a la única función que la invalida, para que no haya dos
+ * cadenas de texto que tengan que coincidir en archivos distintos: la home
+ * (parte 3) etiqueta su lectura con esta constante y el panel la invalida con
+ * la misma. Si fueran dos literales iguales escritos a mano, un cambio en uno
+ * dejaría la home servida desde una caché que ya nadie invalida, y el síntoma
+ * sería "publiqué una reseña y no aparece" días después.
+ */
+export const REVIEWS_CACHE_TAG = "resenas-publicadas";
+
+const REVIEW_COLUMNS =
+  "id, rating, body, display_name, service_type, locale, status, created_at, published_at, moderation_reason, review_invites(source, customer_name)";
+
+/**
+ * PostgREST devuelve la invitación embebida como objeto o como arreglo según
+ * pueda demostrar que la relación es uno-a-uno. Mismo motivo que en
+ * `embeddedReviewStatus`: se aceptan las dos formas en vez de atarse a una
+ * versión concreta.
+ */
+function embeddedInvite(raw: unknown): { source: "web" | "manual"; customerName: string } {
+  const row = Array.isArray(raw) ? raw[0] : raw;
+  const obj = (row ?? {}) as { source?: unknown; customer_name?: unknown };
+  return {
+    source: obj.source === "manual" ? "manual" : "web",
+    customerName: typeof obj.customer_name === "string" ? obj.customer_name : "",
+  };
+}
+
+function toAdminReview(row: Record<string, unknown>): AdminReview {
+  const invite = embeddedInvite(row.review_invites);
+  return {
+    id: String(row.id),
+    rating: Number(row.rating),
+    body: typeof row.body === "string" ? row.body : "",
+    displayName: String(row.display_name ?? ""),
+    serviceType: String(row.service_type ?? ""),
+    locale: normalizeLocale(row.locale),
+    status: (row.status as ReviewStatus) ?? "pendiente",
+    source: invite.source,
+    customerName: invite.customerName,
+    createdAt: String(row.created_at ?? ""),
+    publishedAt: (row.published_at as string | null) ?? null,
+    moderationReason: (row.moderation_reason as ModerationReason | null) ?? null,
+  };
+}
+
+/**
+ * Lo que ve el panel de moderación: las pendientes y las publicadas.
+ *
+ * Las rechazadas no se listan a propósito. Publicar solo vale desde
+ * `pendiente`, así que una vez rechazada u oculta una reseña no vuelve, y
+ * mostrarla en una lista sin ninguna acción posible solo sería ruido en una
+ * pantalla que se usa desde el teléfono. Si algún día hace falta
+ * deshacer una ocultación, es una transición nueva con su propio guardián,
+ * no un filtro más en esta consulta.
+ *
+ * Las pendientes van de la MÁS VIEJA a la más nueva, al revés que el resto
+ * del panel. Es una cola de trabajo: quien dejó su reseña primero no tiene
+ * por qué esperar más solo porque sigan llegando otras.
+ */
+export async function listReviewsForAdmin(): Promise<{
+  pendientes: AdminReview[];
+  publicadas: AdminReview[];
+}> {
+  const vacio = { pendientes: [], publicadas: [] };
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return vacio;
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(REVIEW_COLUMNS)
+    .in("status", ["pendiente", "publicado"]);
+
+  if (error) {
+    console.error("[reviews] no se pudieron listar para el panel:", error);
+    return vacio;
+  }
+
+  const todas = (data ?? []).map((row) => toAdminReview(row as Record<string, unknown>));
+
+  return {
+    pendientes: todas
+      .filter((r) => r.status === "pendiente")
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    publicadas: todas
+      .filter((r) => r.status === "publicado")
+      .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "")),
+  };
+}
+
+export type ModerationResult =
+  | { ok: true; review: AdminReview }
+  | { ok: false; reason: "notFound" | "conflict" | "dbError" };
+
+/**
+ * Aplica una decisión de moderación, con el estado de partida como guardián.
+ *
+ * El `.eq("status", …)` es lo que hace que un doble clic, dos pestañas
+ * abiertas o un reintento de red no apliquen la acción dos veces: el segundo
+ * `update` no encuentra ninguna fila en el estado esperado y no toca nada.
+ * El guardián vive en la consulta, no en el botón deshabilitado de la UI,
+ * porque la UI de la otra pestaña no se entera de lo que hizo esta.
+ *
+ * `published_at` NO se borra al ocultar. La home filtra por `status`, así que
+ * dejarlo puesto no la afecta, y conserva el dato de cuándo estuvo visible.
+ */
+export async function moderateReview(
+  id: string,
+  action: ModerationAction,
+  reason: ModerationReason | null,
+): Promise<ModerationResult> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return { ok: false, reason: "dbError" };
+
+  // De qué estado tiene que venir y a cuál va. Publicar limpia el motivo:
+  // si una reseña se publica, lo que se anotó antes sobre ella ya no aplica.
+  const transicion =
+    action === "publicar"
+      ? {
+          desde: "pendiente",
+          cambios: {
+            status: "publicado",
+            published_at: new Date().toISOString(),
+            moderation_reason: null,
+          },
+        }
+      : {
+          desde: action === "rechazar" ? "pendiente" : "publicado",
+          cambios: { status: "rechazado", moderation_reason: reason },
+        };
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .update(transicion.cambios)
+    .eq("id", id)
+    .eq("status", transicion.desde)
+    .select(REVIEW_COLUMNS)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[reviews] no se pudo moderar:", error);
+    return { ok: false, reason: "dbError" };
+  }
+
+  if (data) return { ok: true, review: toAdminReview(data as Record<string, unknown>) };
+
+  // El update no afectó ninguna fila. Son dos cosas distintas y conviene
+  // distinguirlas: o la reseña no existe, o alguien se adelantó y ya no está
+  // en el estado del que esta acción podía partir. Esta consulta extra solo
+  // corre en ese camino raro.
+  const { data: actual } = await supabase
+    .from("reviews")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+
+  return { ok: false, reason: actual ? "conflict" : "notFound" };
 }

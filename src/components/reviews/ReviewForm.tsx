@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import Star from "@/components/reviews/Star";
 
 const RATINGS = [1, 2, 3, 4, 5] as const;
 const MAX_BODY = 1000;
@@ -152,7 +153,7 @@ export default function ReviewForm({
                 />
                 <span className="sr-only">{t("form.starLabel", { count: n })}</span>
                 <span className="block rounded-sm peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
-                  <Star filled={rating !== null && n <= rating} />
+                  <Star filled={rating !== null && n <= rating} className="size-10" />
                 </span>
               </label>
             ))}
@@ -235,17 +236,3 @@ export default function ReviewForm({
  * `<span className="sr-only">` del label — si la estrella también se
  * anunciara, cada opción se leería dos veces.
  */
-function Star({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={`size-10 ${filled ? "text-star" : "text-star-empty"}`}
-    >
-      <path
-        d="M12 2.5l2.9 6.07 6.6.86-4.83 4.6 1.2 6.57L12 17.5l-5.87 3.1 1.2-6.57L2.5 9.43l6.6-.86L12 2.5z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}

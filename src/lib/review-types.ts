@@ -32,3 +32,57 @@ export interface ManualInviteSummary {
   emailedAt: string | null;
   reviewStatus: ReviewStatus | null;
 }
+
+// ---------------------------------------------------------------------------
+// Moderación (parte 2)
+// ---------------------------------------------------------------------------
+
+/**
+ * Los únicos motivos por los que una reseña se puede rechazar u ocultar.
+ *
+ * Es una lista cerrada, no un campo de texto libre, y eso es cumplimiento,
+ * no comodidad: la regla de la FTC sobre reseñas (16 CFR Part 465, vigente
+ * desde octubre de 2024) y la política de reseñas de Google prohíben filtrar
+ * reseñas por ser negativas. Los cuatro motivos de acá no miran la
+ * calificación — una reseña de 1★ bien escrita sobre el servicio no encaja en
+ * ninguno, así que el sistema no ofrece ninguna forma de quitarla.
+ *
+ * Que la lista viva en el tipo y no en la UI es lo que lo hace cumplirse: el
+ * servidor rechaza cualquier motivo que no esté acá, así que ni un cliente
+ * manipulado ni un botón futuro pueden colar "es negativa".
+ */
+export const MODERATION_REASONS = [
+  "ofensivo",
+  "datosPersonales",
+  "noHablaDelServicio",
+  "spam",
+] as const;
+
+export type ModerationReason = (typeof MODERATION_REASONS)[number];
+
+/**
+ * `rechazar` y `ocultar` acaban las dos en `status: 'rechazado'` y las dos
+ * exigen motivo. Son dos acciones distintas porque el estado del que PARTEN
+ * es distinto, y ese estado de partida es el guardián: rechazar solo vale
+ * sobre una pendiente, ocultar solo sobre una publicada. Con una sola acción
+ * genérica, un clic repetido sobre una reseña que otra pestaña ya movió
+ * volvería a "funcionar" en vez de avisar de que el mundo cambió.
+ */
+export type ModerationAction = "publicar" | "rechazar" | "ocultar";
+
+/** Una reseña tal como la ve el panel de moderación. */
+export interface AdminReview {
+  id: string;
+  rating: number;
+  body: string;
+  displayName: string;
+  serviceType: string;
+  locale: ReviewLocale;
+  status: ReviewStatus;
+  /** De una reserva web o de una invitación creada a mano para un teléfono. */
+  source: "web" | "manual";
+  customerName: string;
+  createdAt: string;
+  publishedAt: string | null;
+  moderationReason: ModerationReason | null;
+}
