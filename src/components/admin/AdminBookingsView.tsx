@@ -203,6 +203,13 @@ export default function AdminBookingsView() {
           ),
         );
         setErrors((e) => ({ ...e, [booking.id]: "" }));
+        // El parche de arriba solo sirve para que el botón responda al
+        // instante. Generar el link crea TAMBIÉN la invitación de reseña en
+        // el servidor, y ese dato no se puede adivinar desde aquí: sin
+        // recargar, el bloque de Reseña seguiría ofreciendo "Crear link de
+        // reseña" para una invitación que ya existe. Mismo patrón que el
+        // `onChanged` de las invitaciones manuales.
+        await load(token);
       } else {
         setErrors((e) => ({ ...e, [booking.id]: describeError(data.error) }));
       }
