@@ -114,9 +114,14 @@ export default function ReviewInviteBlock({
       ) : (
         <div className="mt-2 flex flex-col gap-2">
           <p className="text-small text-text-muted">{describeState(resena)}</p>
-          <p className="truncate rounded-md bg-bg-alt px-3 py-2 text-tiny text-text-faint">
-            {resena.url}
-          </p>
+          <input
+            type="text"
+            readOnly
+            value={resena.url}
+            onFocus={(e) => e.currentTarget.select()}
+            onClick={(e) => e.currentTarget.select()}
+            className="h-11 w-full rounded-md border-2 border-border bg-bg-alt px-3 text-tiny text-text"
+          />
           <CopyLinkButton url={resena.url} label="Copiar link de reseña" />
 
           {/*

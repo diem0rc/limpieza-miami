@@ -383,9 +383,14 @@ export default function AdminBookingsView() {
 
               {b.paymentLinkUrl && (
                 <div className="mt-4 flex flex-col gap-2">
-                  <p className="truncate rounded-md bg-bg-alt px-3 py-2 text-tiny text-text-faint">
-                    {b.paymentLinkUrl}
-                  </p>
+                  <input
+                    type="text"
+                    readOnly
+                    value={b.paymentLinkUrl}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onClick={(e) => e.currentTarget.select()}
+                    className="h-11 w-full rounded-md border-2 border-border bg-bg-alt px-3 text-tiny text-text"
+                  />
                   <CopyLinkButton url={b.paymentLinkUrl} label="Copiar link de pago" />
                 </div>
               )}

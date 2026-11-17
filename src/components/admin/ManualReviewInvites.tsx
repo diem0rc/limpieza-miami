@@ -130,9 +130,17 @@ export default function ManualReviewInvites({
       {created && (
         <div className="mt-3 rounded-lg border-2 border-border bg-surface p-4">
           <p className="text-small font-semibold text-text">Invitación creada</p>
-          <p className="mt-2 truncate rounded-md bg-bg-alt px-3 py-2 text-tiny text-text-faint">
-            {created.url}
-          </p>
+          {/* Un campo y no un párrafo: un toque lo selecciona entero. Es la
+              red de seguridad para cuando el navegador no deja copiar — y
+              también para quien simplemente prefiere copiarlo a mano. */}
+          <input
+            type="text"
+            readOnly
+            value={created.url}
+            onFocus={(e) => e.currentTarget.select()}
+            onClick={(e) => e.currentTarget.select()}
+            className="mt-2 h-11 w-full rounded-md border-2 border-border bg-bg-alt px-3 text-tiny text-text"
+          />
           <div className="mt-2">
             <CopyLinkButton url={created.url} label="Copiar link de reseña" />
           </div>
