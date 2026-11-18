@@ -407,7 +407,9 @@
     },
     "thanks": {
       "title": "Thank you!",
-      "body": "We'll review it and publish it soon."
+      "body": "We'll review it and publish it soon.",
+      "googleInvite": "Would you help us with one more? Leaving it on Google too helps more Miami families find us.",
+      "googleButton": "Review us on Google"
     },
     "section": {
       "title": "What our customers say",

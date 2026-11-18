@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import GoogleInvite from "@/components/reviews/GoogleInvite";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import { BRAND } from "@/config/brand.config";
 import { formatDateLong } from "@/lib/format";
@@ -88,6 +89,12 @@ export default async function ReviewPage({
       <Shell>
         <h1 className="text-h2 font-bold text-text">{t("done.title")}</h1>
         <p className="mt-3 text-body text-text-muted">{t("done.body")}</p>
+        {/* Quien vuelve a abrir su link ya reseñó: sigue siendo un cliente al
+            que tiene sentido invitar a Google. */}
+        <GoogleInvite
+          invite={t("thanks.googleInvite")}
+          button={t("thanks.googleButton")}
+        />
       </Shell>
     );
   }

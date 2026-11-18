@@ -30,6 +30,19 @@ export const BRAND = {
   /** Ruta del logo cuando exista; null muestra solo el nombre en texto */
   logoPath: '/logo.png' as string | null,
 
+  /**
+   * Link a la ficha de Google para dejar una reseña.
+   *
+   * Vacío = la invitación a reseñar en Google no aparece en ningún lado. El
+   * sitio funciona igual; simplemente no se le pide nada de Google al cliente.
+   *
+   * Esta clave la añadió ESTE proyecto, no vino en el archivo de marca del
+   * cliente — igual que `COLORS.discount`, `grime` y `onDiscount`. Si algún
+   * día llega un `brand.config.ts` nuevo del diseñador, hay que volver a
+   * añadirla a mano.
+   */
+  googleReviewUrl: '',
+
   city: 'Miami, FL',
 };
 

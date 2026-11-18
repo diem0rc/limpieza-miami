@@ -407,7 +407,9 @@
     },
     "thanks": {
       "title": "¡Gracias!",
-      "body": "La revisamos y la publicamos pronto."
+      "body": "La revisamos y la publicamos pronto.",
+      "googleInvite": "¿Nos ayudas con una más? Dejarla también en Google hace que más familias de Miami nos encuentren.",
+      "googleButton": "Dejar reseña en Google"
     },
     "section": {
       "title": "Lo que dicen nuestros clientes",

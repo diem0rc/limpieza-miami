@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import GoogleInvite from "@/components/reviews/GoogleInvite";
 import Star from "@/components/reviews/Star";
 
 const RATINGS = [1, 2, 3, 4, 5] as const;
@@ -110,6 +111,10 @@ export default function ReviewForm({
       <div>
         <h1 className="text-h2 font-bold text-text">{t("thanks.title")}</h1>
         <p className="mt-3 text-body text-text-muted">{t("thanks.body")}</p>
+        <GoogleInvite
+          invite={t("thanks.googleInvite")}
+          button={t("thanks.googleButton")}
+        />
       </div>
     );
   }
@@ -119,6 +124,12 @@ export default function ReviewForm({
       <div>
         <h1 className="text-h2 font-bold text-text">{t("done.title")}</h1>
         <p className="mt-3 text-body text-text-muted">{t("done.body")}</p>
+        {/* También acá: quien vuelve a abrir su link ya reseñó, así que
+            sigue siendo un cliente al que tiene sentido invitar a Google. */}
+        <GoogleInvite
+          invite={t("thanks.googleInvite")}
+          button={t("thanks.googleButton")}
+        />
       </div>
     );
   }
