@@ -38,7 +38,43 @@ const MAX_SIDE = 1600;
  * existe. Donde no, se cae a una `<img>`, que los navegadores actuales ya
  * enderezan solas al decodificar.
  */
+/**
+ * ¿Tiene pinta de ser un HEIC/HEIF del iPhone?
+ *
+ * Se mira antes de nada porque el decodificador de HEIC pesa unos 3 MB: no
+ * tiene sentido descargarlo para una foto normal. Se comprueba el tipo Y la
+ * extensión porque Chrome en Mac suele devolver `type` vacío para un .HEIC
+ * copiado desde el teléfono.
+ */
+function pareceHeic(file: File): boolean {
+  return /image\/hei[cf]/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+}
+
+/**
+ * Convierte un HEIC a algo que el canvas sepa dibujar.
+ *
+ * El import es dinámico a propósito: así los 3 MB del decodificador solo se
+ * descargan cuando de verdad aparece un HEIC, y nunca en el sitio público.
+ */
+async function decodificarHeic(file: File): Promise<ImageBitmap | null> {
+  try {
+    const { heicTo } = await import("heic-to/next");
+    return await heicTo({ blob: file, type: "bitmap" });
+  } catch {
+    return null;
+  }
+}
+
 async function decodificar(file: File): Promise<ImageBitmap | HTMLImageElement> {
+  // El iPhone guarda las fotos en HEIC, y NINGÚN navegador salvo Safari las
+  // sabe decodificar. Pasarlas del teléfono a la computadora y subirlas desde
+  // Chrome es el camino más natural del mundo y fallaba siempre.
+  if (pareceHeic(file)) {
+    const bitmap = await decodificarHeic(file);
+    if (bitmap) return bitmap;
+    throw new Error("heic ilegible");
+  }
+
   if (typeof createImageBitmap === "function") {
     try {
       return await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -87,7 +123,13 @@ export async function resizeForUpload(file: File): Promise<ResizedImage | null> 
   try {
     fuente = await decodificar(file);
   } catch {
-    return null;
+    // Último intento: un HEIC que no se delató ni por el tipo ni por el
+    // nombre. Llegar hasta acá es raro, y para entonces ya da igual descargar
+    // el decodificador: la alternativa es decirle al usuario que su foto no
+    // sirve.
+    const bitmap = await decodificarHeic(file);
+    if (!bitmap) return null;
+    fuente = bitmap;
   }
 
   const { w, h } = medidas(fuente);
