@@ -413,7 +413,8 @@
       "title": "Lo que dicen nuestros clientes",
       "summary": "{average} de 5 · {total, plural, one {# reseña} other {# reseñas}}",
       "verified": "Cliente verificado",
-      "stars": "{rating} de 5 estrellas"
+      "stars": "{rating} de 5 estrellas",
+      "photosBy": "Fotos del trabajo — {brand}"
     }
   }
 }

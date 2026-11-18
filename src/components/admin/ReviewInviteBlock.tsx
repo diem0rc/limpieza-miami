@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import CopyLinkButton from "@/components/admin/CopyLinkButton";
+import ReviewPhotosBlock from "@/components/admin/ReviewPhotosBlock";
 import { describeEmailFailure, sendInviteEmail } from "@/lib/admin-review-client";
 import type { BookingReviewState } from "@/lib/review-types";
 
@@ -23,12 +24,19 @@ export default function ReviewInviteBlock({
   token,
   resena,
   onChange,
+  onReload,
   onExpired,
 }: {
   bookingId: string;
   token: string;
   resena: BookingReviewState | null;
   onChange: (next: BookingReviewState) => void;
+  /**
+   * Recarga la lista entera. Las fotos viven en el servidor y su bloque no
+   * puede adivinar cómo queda la lista después de subir o borrar, así que
+   * pide los datos de nuevo en vez de parchear el estado local.
+   */
+  onReload: () => void;
   onExpired: () => void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -67,6 +75,8 @@ export default function ReviewInviteBlock({
         url: data.url,
         emailedAt: null,
         reviewStatus: null,
+        // Invitación recién creada: todavía no puede tener fotos.
+        photos: [],
       });
     } catch {
       setError("Se perdió la conexión. Verifica antes de reintentar.");
@@ -123,6 +133,14 @@ export default function ReviewInviteBlock({
             className="h-11 w-full rounded-md border-2 border-border bg-bg-alt px-3 text-tiny text-text"
           />
           <CopyLinkButton url={resena.url} label="Copiar link de reseña" />
+
+          <ReviewPhotosBlock
+            inviteId={resena.inviteId}
+            photos={resena.photos}
+            token={token}
+            onChanged={onReload}
+            onExpired={onExpired}
+          />
 
           {/*
             El botón de correo desaparece si ya reseñó: volver a pedirle una

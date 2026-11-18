@@ -18,6 +18,7 @@ export interface BookingReviewState {
   url: string;
   emailedAt: string | null;
   reviewStatus: ReviewStatus | null;
+  photos: ReviewPhoto[];
 }
 
 /** Una invitación de cliente telefónico, en la lista del panel. */
@@ -31,6 +32,7 @@ export interface ManualInviteSummary {
   locale: ReviewLocale;
   emailedAt: string | null;
   reviewStatus: ReviewStatus | null;
+  photos: ReviewPhoto[];
 }
 
 // ---------------------------------------------------------------------------
@@ -86,3 +88,26 @@ export interface AdminReview {
   publishedAt: string | null;
   moderationReason: ModerationReason | null;
 }
+
+// ---------------------------------------------------------------------------
+// Fotos del trabajo
+// ---------------------------------------------------------------------------
+
+/**
+ * Una foto del trabajo terminado, ya lista para pintar.
+ *
+ * `url` es absoluta y permanente (el bucket es público, ver
+ * supabase/sql/2026-11-fotos-de-resenas.sql). `width` y `height` son los del
+ * archivo guardado y van tal cual en la etiqueta `<img>`: sin ellos el
+ * navegador no reserva el espacio y la página salta cuando cada foto termina
+ * de cargar.
+ */
+export interface ReviewPhoto {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+}
+
+/** Cuántas fotos admite un trabajo. Lo impone el servidor, no la interfaz. */
+export const MAX_PHOTOS_PER_INVITE = 4;

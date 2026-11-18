@@ -8,8 +8,10 @@ import type {
   ModerationAction,
   ModerationReason,
   ReviewLocale,
+  ReviewPhoto,
   ReviewStatus,
 } from "@/lib/review-types";
+import { listPhotosByInvite } from "@/lib/review-photos";
 import { SITE_URL } from "@/lib/seo";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -342,6 +344,9 @@ export async function listReviewStateByBooking(): Promise<Map<string, BookingRev
     return map;
   }
 
+  // Las fotos de todas las invitaciones de un tirón, no una consulta por fila.
+  const fotos = await listPhotosByInvite((data ?? []).map((r) => r.id));
+
   for (const row of data ?? []) {
     if (!row.booking_id) continue;
     map.set(row.booking_id, {
@@ -349,6 +354,7 @@ export async function listReviewStateByBooking(): Promise<Map<string, BookingRev
       url: reviewUrl({ token: row.token, locale: normalizeLocale(row.locale) }),
       emailedAt: row.emailed_at,
       reviewStatus: embeddedReviewStatus(row.reviews),
+      photos: fotos.get(row.id) ?? [],
     });
   }
 
@@ -373,6 +379,8 @@ export async function listManualInvites(): Promise<ManualInviteSummary[]> {
     return [];
   }
 
+  const fotos = await listPhotosByInvite((data ?? []).map((r) => r.id));
+
   return (data ?? []).map((row) => ({
     id: row.id,
     url: reviewUrl({ token: row.token, locale: normalizeLocale(row.locale) }),
@@ -383,6 +391,7 @@ export async function listManualInvites(): Promise<ManualInviteSummary[]> {
     locale: normalizeLocale(row.locale),
     emailedAt: row.emailed_at,
     reviewStatus: embeddedReviewStatus(row.reviews),
+    photos: fotos.get(row.id) ?? [],
   }));
 }
 
@@ -576,6 +585,8 @@ export interface PublishedReview {
   serviceType: string;
   locale: ReviewLocale;
   publishedAt: string;
+  /** Fotos del trabajo, subidas por el equipo. Pueden no existir. */
+  photos: ReviewPhoto[];
 }
 
 export interface PublishedReviews {
@@ -606,7 +617,9 @@ async function loadPublishedReviews(): Promise<PublishedReviews> {
   // otra de seis filas.
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, rating, body, display_name, service_type, locale, published_at")
+    .select(
+      "id, invite_id, rating, body, display_name, service_type, locale, published_at",
+    )
     .eq("status", "publicado")
     .order("published_at", { ascending: false });
 
@@ -620,10 +633,15 @@ async function loadPublishedReviews(): Promise<PublishedReviews> {
 
   const suma = filas.reduce((acc, r) => acc + Number(r.rating), 0);
 
+  // Solo las fotos de las que se van a pintar. El promedio y el total salen de
+  // todas las publicadas, pero traer las fotos de todas sería trabajo tirado.
+  const enPantalla = filas.slice(0, EN_PANTALLA);
+  const fotos = await listPhotosByInvite(enPantalla.map((r) => String(r.invite_id)));
+
   return {
     total: filas.length,
     average: Math.round((suma / filas.length) * 10) / 10,
-    latest: filas.slice(0, EN_PANTALLA).map((r) => ({
+    latest: enPantalla.map((r) => ({
       id: String(r.id),
       rating: Number(r.rating),
       body: typeof r.body === "string" ? r.body : "",
@@ -631,6 +649,7 @@ async function loadPublishedReviews(): Promise<PublishedReviews> {
       serviceType: String(r.service_type ?? ""),
       locale: normalizeLocale(r.locale),
       publishedAt: String(r.published_at ?? ""),
+      photos: fotos.get(String(r.invite_id)) ?? [],
     })),
   };
 }

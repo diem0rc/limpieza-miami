@@ -413,7 +413,8 @@
       "title": "What our customers say",
       "summary": "{average} out of 5 · {total, plural, one {# review} other {# reviews}}",
       "verified": "Verified customer",
-      "stars": "{rating} out of 5 stars"
+      "stars": "{rating} out of 5 stars",
+      "photosBy": "Photos of the job — {brand}"
     }
   }
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import CopyLinkButton from "@/components/admin/CopyLinkButton";
+import ReviewPhotosBlock from "@/components/admin/ReviewPhotosBlock";
 import { describeState, shortDate } from "@/components/admin/ReviewInviteBlock";
 import {
   createManualInviteRequest,
@@ -285,6 +286,14 @@ export default function ManualReviewInvites({
               {rowError[invite.id] && (
                 <p className="mt-2 text-small text-error">{rowError[invite.id]}</p>
               )}
+
+              <ReviewPhotosBlock
+                inviteId={invite.id}
+                photos={invite.photos}
+                token={token}
+                onChanged={onChanged}
+                onExpired={onExpired}
+              />
 
               <div className="mt-3 flex flex-col gap-2">
                 <CopyLinkButton url={invite.url} label="Copiar link de reseña" />

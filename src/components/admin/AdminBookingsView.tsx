@@ -401,6 +401,7 @@ export default function AdminBookingsView() {
                   token={token}
                   resena={b.resena}
                   onChange={(next) => updateResena(b.id, next)}
+                  onReload={() => load(token)}
                   onExpired={() => setToken(null)}
                 />
               )}

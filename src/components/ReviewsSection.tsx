@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { BRAND } from "@/config/brand.config";
 import Container from "@/components/ui/Container";
 import { StarRow } from "@/components/reviews/Star";
 import { getPublishedReviews, type PublishedReview } from "@/lib/reviews";
@@ -72,6 +73,7 @@ export default async function ReviewsSection() {
               date={monthAndYear(review.publishedAt, locale)}
               starsLabel={t("stars", { rating: review.rating })}
               verifiedLabel={t("verified")}
+              photosLabel={t("photosBy", { brand: BRAND.name })}
             />
           ))}
         </ul>
@@ -86,12 +88,14 @@ function ReviewCard({
   date,
   starsLabel,
   verifiedLabel,
+  photosLabel,
 }: {
   review: PublishedReview;
   serviceName: string;
   date: string;
   starsLabel: string;
   verifiedLabel: string;
+  photosLabel: string;
 }) {
   return (
     <li className="flex w-[82%] shrink-0 snap-start flex-col rounded-lg border border-border bg-surface p-6 sm:w-[48%] md:w-auto">
@@ -134,6 +138,57 @@ function ReviewCard({
       <p className="mt-3 text-tiny font-semibold uppercase tracking-wider text-text-faint">
         {verifiedLabel}
       </p>
+
+      {/*
+        Las fotos las sube el EQUIPO, no el cliente, y por eso van después del
+        bloque del cliente y con su propia atribución visible. Presentarlas
+        como si las hubiera tomado quien escribió la reseña es exactamente lo
+        que la regla de la FTC sobre reseñas considera engañoso, así que esa
+        etiqueta no es decorativa: es la que hace honesta la tarjeta.
+
+        Una sola foto ocupa el ancho entero de la tarjeta, porque una foto
+        pequeña y sola se lee como un icono perdido; de dos en adelante van en
+        dos columnas.
+      */}
+      {review.photos.length > 0 && (
+        <figure className="mt-4">
+          <ul
+            className={`grid gap-2 ${review.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+          >
+            {review.photos.map((photo) => (
+              <li key={photo.id}>
+                {/*
+                  `alt` vacío a propósito: nadie escribe una descripción de
+                  cada foto, y un texto inventado ("foto del trabajo") sería
+                  ruido para quien usa lector de pantalla, que justo debajo ya
+                  encuentra el pie que dice qué son estas imágenes. Vacío es la
+                  forma correcta de decir "esto lo explica el texto de al lado".
+
+                  <img> y no next/image: salen del navegador ya redimensionadas
+                  y en webp, así que el optimizador no tiene nada que mejorar.
+                  `width`/`height` reservan el espacio y evitan que la página
+                  salte al cargar.
+                */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.url}
+                  alt=""
+                  width={photo.width}
+                  height={photo.height}
+                  loading="lazy"
+                  decoding="async"
+                  className={`w-full rounded-md border border-border object-cover ${
+                    review.photos.length === 1 ? "aspect-[4/3]" : "aspect-square"
+                  }`}
+                />
+              </li>
+            ))}
+          </ul>
+          <figcaption className="mt-2 text-tiny text-text-faint">
+            {photosLabel}
+          </figcaption>
+        </figure>
+      )}
     </li>
   );
 }
