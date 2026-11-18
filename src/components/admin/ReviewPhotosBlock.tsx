@@ -46,13 +46,8 @@ export default function ReviewPhotosBlock({
 
   const quedan = MAX_PHOTOS_PER_INVITE - photos.length;
 
-  async function subir(files: FileList) {
+  async function subir(elegidas: File[]) {
     setError(null);
-
-    // Se recorta a los huecos que quedan ANTES de tocar la red. El servidor
-    // lo comprueba igual, pero así no se suben tres fotos para que la cuarta
-    // rebote.
-    const elegidas = Array.from(files).slice(0, quedan);
     if (elegidas.length === 0) return;
 
     let fallo: PhotoFailureKind | null = null;
@@ -164,12 +159,22 @@ export default function ReviewPhotosBlock({
             multiple
             className="hidden"
             onChange={(e) => {
-              const files = e.currentTarget.files;
-              // El valor se limpia para que elegir OTRA VEZ la misma foto
-              // vuelva a disparar el evento: sin esto, borrar una foto y
-              // volver a elegir la misma no haría nada.
+              // `Array.from` ANTES de limpiar `value`, y esto no es estilo:
+              // `input.files` es una FileList VIVA, no una copia. Al poner
+              // `value = ""` esa misma lista se vacía, así que una referencia
+              // guardada antes se queda con cero archivos y no se sube nada.
+              // Comprobado en el navegador: longitud 1 antes de limpiar, 0
+              // después, sobre el mismo objeto.
+              //
+              // Y limpiar `value` hace falta: sin eso, elegir OTRA VEZ la
+              // misma foto no dispararía el evento, así que borrar una y
+              // volver a elegirla no haría nada.
+              const elegidas = Array.from(e.currentTarget.files ?? []).slice(
+                0,
+                quedan,
+              );
               e.currentTarget.value = "";
-              if (files) subir(files);
+              if (elegidas.length > 0) subir(elegidas);
             }}
           />
           <button

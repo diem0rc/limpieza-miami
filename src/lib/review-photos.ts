@@ -142,8 +142,18 @@ export async function addPhoto(params: {
       // Nunca sobrescribir: la ruta lleva 12 bytes aleatorios, así que una
       // colisión significaría algo muy raro y es mejor que falle ruidosamente.
       upsert: false,
-      // Un año: el archivo no cambia nunca — si se reemplaza una foto, es
-      // otra ruta distinta.
+      // Un año. Es seguro porque el archivo NUNCA cambia: cada subida tiene
+      // su propia ruta aleatoria y nada se sobrescribe, así que reemplazar
+      // una foto es en realidad subir otra distinta y borrar la vieja.
+      //
+      // La contrapartida, medida: al borrar una foto, su URL sigue
+      // respondiendo 200 un rato porque el CDN de Supabase la tiene cacheada,
+      // aunque el archivo ya no esté en el bucket. No afecta al sitio —la
+      // fila se borró, así que ninguna página la enlaza— pero significa que
+      // "borrada" y "ya no se puede abrir con el link directo" no ocurren en
+      // el mismo instante. Para fotos de marketing que el propio negocio
+      // publicó, es un intercambio razonable a cambio de que quien vuelva a
+      // la home no se las baje otra vez.
       cacheControl: "31536000",
     });
 
