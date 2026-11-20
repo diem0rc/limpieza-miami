@@ -425,7 +425,7 @@ function embeddedReviewStatus(raw: unknown): ReviewStatus | null {
 export const REVIEWS_CACHE_TAG = "resenas-publicadas";
 
 const REVIEW_COLUMNS =
-  "id, rating, body, display_name, service_type, locale, status, created_at, published_at, moderation_reason, review_invites(source, customer_name)";
+  "id, invite_id, rating, body, display_name, service_type, locale, status, created_at, published_at, moderation_reason, review_invites(source, customer_name)";
 
 /**
  * PostgREST devuelve la invitación embebida como objeto o como arreglo según
@@ -442,10 +442,15 @@ function embeddedInvite(raw: unknown): { source: "web" | "manual"; customerName:
   };
 }
 
-function toAdminReview(row: Record<string, unknown>): AdminReview {
+function toAdminReview(
+  row: Record<string, unknown>,
+  fotos: Map<string, ReviewPhoto[]>,
+): AdminReview {
   const invite = embeddedInvite(row.review_invites);
+  const inviteId = String(row.invite_id ?? "");
   return {
     id: String(row.id),
+    inviteId,
     rating: Number(row.rating),
     body: typeof row.body === "string" ? row.body : "",
     displayName: String(row.display_name ?? ""),
@@ -457,6 +462,7 @@ function toAdminReview(row: Record<string, unknown>): AdminReview {
     createdAt: String(row.created_at ?? ""),
     publishedAt: (row.published_at as string | null) ?? null,
     moderationReason: (row.moderation_reason as ModerationReason | null) ?? null,
+    photos: fotos.get(inviteId) ?? [],
   };
 }
 
@@ -492,7 +498,15 @@ export async function listReviewsForAdmin(): Promise<{
     return vacio;
   }
 
-  const todas = (data ?? []).map((row) => toAdminReview(row as Record<string, unknown>));
+  // Las fotos de todas las reseñas de la pantalla en una sola consulta, igual
+  // que en el resto del panel: una por reseña sería el clásico N+1.
+  const fotos = await listPhotosByInvite(
+    (data ?? []).map((r) => String((r as Record<string, unknown>).invite_id)),
+  );
+
+  const todas = (data ?? []).map((row) =>
+    toAdminReview(row as Record<string, unknown>, fotos),
+  );
 
   return {
     pendientes: todas
@@ -558,7 +572,11 @@ export async function moderateReview(
     return { ok: false, reason: "dbError" };
   }
 
-  if (data) return { ok: true, review: toAdminReview(data as Record<string, unknown>) };
+  if (data) {
+    const fila = data as Record<string, unknown>;
+    const fotos = await listPhotosByInvite([String(fila.invite_id)]);
+    return { ok: true, review: toAdminReview(fila, fotos) };
+  }
 
   // El update no afectó ninguna fila. Son dos cosas distintas y conviene
   // distinguirlas: o la reseña no existe, o alguien se adelantó y ya no está

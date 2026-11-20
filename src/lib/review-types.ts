@@ -75,6 +75,14 @@ export type ModerationAction = "publicar" | "rechazar" | "ocultar";
 /** Una reseña tal como la ve el panel de moderación. */
 export interface AdminReview {
   id: string;
+  /**
+   * La invitación de la que salió.
+   *
+   * Es lo que permite subir las fotos del trabajo desde la propia tarjeta de
+   * moderación: las fotos cuelgan de la invitación, no de la reseña, porque
+   * el equipo las tiene el día del trabajo y la reseña llega días después.
+   */
+  inviteId: string;
   rating: number;
   body: string;
   displayName: string;
@@ -87,6 +95,8 @@ export interface AdminReview {
   createdAt: string;
   publishedAt: string | null;
   moderationReason: ModerationReason | null;
+  /** Fotos del trabajo ya subidas para esta invitación. Puede estar vacía. */
+  photos: ReviewPhoto[];
 }
 
 // ---------------------------------------------------------------------------

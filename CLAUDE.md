@@ -576,19 +576,68 @@ valor de `pricing.config.ts` — pregunta antes: eso sí sería nuevo.
     build, `getSupabaseAdmin()` devuelve `null`, la sección desaparece y el
     build no falla.
 
+23. **Las fotos del trabajo cuelgan de la INVITACIÓN, no de la reseña, y son
+    del NEGOCIO, no del cliente.** Las sube el equipo desde el panel
+    (`review_photos`, tabla con `invite_id` y `on delete cascade`; esquema en
+    `supabase/sql/2026-11-fotos-de-resenas.sql`). Colgarlas de la invitación
+    y no de la reseña es lo que hace que el orden no importe: el equipo tiene
+    las fotos el día del trabajo, la reseña llega días después, y cualquiera
+    de los dos puede pasar primero.
+    **La atribución no es cosmética.** La regla de la FTC sobre reseñas (16
+    CFR Part 465) trata como engañoso presentar material de la empresa como
+    si viniera de quien escribió la reseña, así que la home las muestra
+    debajo del bloque del cliente, en un `<figure>` con su pie visible
+    ("Fotos del trabajo — DiBasilio Maid"). No existe ningún camino para que
+    una foto aparezca sin esa etiqueta, y no se debe añadir.
+    **El bucket es público** (`review-photos`, con guion: un espacio en el
+    nombre produciría `%20` en cada URL). Tiene que serlo porque la home es
+    estática: una URL firmada vence, y vencería ya horneada dentro del HTML
+    prerenderizado. Las fotos las publica el propio negocio, así que no hay
+    nada privado que proteger.
+    **El mismo `ReviewPhotosBlock` se monta en TRES sitios** — el bloque de
+    Reseña de una reserva web, cada fila de "Clientes sin reserva web" y la
+    tarjeta de moderación — sobre la MISMA invitación. No son tres juegos de
+    fotos: es el mismo, y verlo en los tres evita justo la confusión de creer
+    que una reseña recién llegada "no tiene fotos" porque se subieron desde
+    otra pantalla. (Esto último se añadió precisamente después de que pasara
+    con la primera reseña real.)
+    **El redimensionado pasa en el navegador** (`src/lib/image-resize.ts`,
+    lado largo 1600, WebP 0.82 con JPEG de respaldo): las funciones de Vercel
+    rechazan cuerpos de más de 4,5 MB y una foto de un teléfono actual los
+    pasa sola. Dos trampas documentadas ahí y ya pagadas:
+    - **`input.files` es una FileList VIVA.** Guardar la referencia y después
+      poner `input.value = ""` (que hace falta para poder volver a elegir la
+      misma foto) la deja en cero archivos. Hay que `Array.from(...)` ANTES
+      de limpiar. Medido en el navegador: longitud 1 antes, 0 después, mismo
+      objeto. Sin eso no se sube nada, en silencio.
+    - **HEIC del iPhone.** Ningún navegador salvo Safari lo decodifica, y
+      Chrome en Mac devuelve `type` vacío para un `.HEIC` copiado del
+      teléfono — por eso se mira también la extensión. Se convierte con
+      `heic-to`, importado dinámicamente para no cargarle 3 MB a nadie más.
+    Al subir o borrar una foto se invalida `REVIEWS_CACHE_TAG` siempre, sin
+    averiguar antes si esa reseña está publicada: la consulta extra costaría
+    más que regenerar una página de más.
+    Contrapartida medida y aceptada: al borrar una foto, su URL sigue
+    respondiendo 200 un rato (CDN de Supabase, `cacheControl` de un año). No
+    afecta al sitio — la fila ya no existe, así que ninguna página la
+    enlaza.
+
 # Estado real de la infraestructura
 
-- **Hay base de datos: Supabase.** Tres tablas: `bookings` (fase 6, entrada
-  17 de decisiones) y `review_invites` + `reviews` (fase 7, entrada 21). Las
-  tres con RLS activo y **sin políticas** — todo el acceso pasa por el
-  servidor con la clave "secret", el navegador nunca las toca.
+- **Hay base de datos: Supabase.** Cuatro tablas: `bookings` (fase 6, entrada
+  17 de decisiones), `review_invites` + `reviews` (fase 7, entrada 21) y
+  `review_photos` (fotos del trabajo, entrada 23). Las cuatro con RLS activo
+  y **sin políticas** — todo el acceso pasa por el servidor con la clave
+  "secret", el navegador nunca las toca. Hay además un bucket de Storage
+  público, `review-photos`.
   El esquema está a medias en cuanto a versionado, y conviene saber cuál es
   cuál: el `create table bookings` original **no** está en el repo (se corrió
   a mano en el SQL Editor del dashboard), pero el de la fase 7 **sí**, en
-  `supabase/sql/2026-11-fase7-resenas.sql`. Ese archivo es el primero de
-  esquema del repo y lleva en comentarios el porqué de cada columna. Para
-  una columna nueva: un `alter table` en el SQL Editor, y si toca las tablas
-  de reseñas, añadirlo también a ese archivo.
+  `supabase/sql/2026-11-fase7-resenas.sql`, igual que el de las fotos en
+  `supabase/sql/2026-11-fotos-de-resenas.sql`. Los dos llevan en comentarios
+  el porqué de cada columna. Para una columna nueva: un `alter table` en el
+  SQL Editor, y si toca las tablas de reseñas, añadirlo también a esos
+  archivos.
 - **Auth también es de Supabase**, un solo usuario (el dueño,
   `dibasiliomaid@gmail.com`), creado desde el dashboard — ver entrada 9.
 - **Las reseñas están completas y verificadas de punta a punta** (fase 7):

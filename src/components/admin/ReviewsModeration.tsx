@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { shortDate } from "@/components/admin/ReviewInviteBlock";
+import ReviewPhotosBlock from "@/components/admin/ReviewPhotosBlock";
 import { StarRow } from "@/components/reviews/Star";
 import {
   describeModerationFailure,
@@ -53,15 +54,19 @@ function ReviewCard({
   error,
   preguntando,
   serviceName,
+  token,
   onApply,
   onAsk,
   onCancelAsk,
+  onChanged,
+  onExpired,
 }: {
   review: AdminReview;
   isBusy: boolean;
   error: string | undefined;
   preguntando: ModerationAction | null;
   serviceName: string;
+  token: string;
   onApply: (
     review: AdminReview,
     action: ModerationAction,
@@ -69,6 +74,8 @@ function ReviewCard({
   ) => void;
   onAsk: (id: string, action: ModerationAction) => void;
   onCancelAsk: () => void;
+  onChanged: () => void;
+  onExpired: () => void;
 }) {
     const fecha = review.status === "publicado" ? review.publishedAt : review.createdAt;
 
@@ -99,6 +106,27 @@ function ReviewCard({
             Cliente: {review.customerName}
           </p>
         )}
+
+        {/*
+          Las fotos del trabajo, acá mismo.
+
+          Están repetidas respecto a la fila de la invitación (en la reserva
+          web o en "Clientes sin reserva web") a propósito: son el MISMO
+          bloque sobre la MISMA invitación, no dos juegos de fotos. Cuando
+          llega una reseña, esta tarjeta es donde se la mira, y no encontrar
+          acá las fotos hace pensar que la reseña no las tiene.
+
+          Siguen siendo fotos DEL NEGOCIO, no del cliente: el propio bloque
+          lleva la etiqueta que lo dice, y la home las muestra separadas del
+          texto de la reseña por la misma razón de cumplimiento.
+        */}
+        <ReviewPhotosBlock
+          inviteId={review.inviteId}
+          photos={review.photos}
+          token={token}
+          onChanged={onChanged}
+          onExpired={onExpired}
+        />
 
         {error && <p className="mt-2 text-small text-error">{error}</p>}
 
@@ -245,9 +273,12 @@ export default function ReviewsModeration({
               error={errors[r.id]}
               preguntando={asking?.id === r.id ? asking.action : null}
               serviceName={tServices(`${r.serviceType}.name`)}
+              token={token}
               onApply={apply}
               onAsk={(id, action) => setAsking({ id, action })}
               onCancelAsk={() => setAsking(null)}
+              onChanged={onChanged}
+              onExpired={onExpired}
             />
           ))}
         </ul>
@@ -282,9 +313,12 @@ export default function ReviewsModeration({
               error={errors[r.id]}
               preguntando={asking?.id === r.id ? asking.action : null}
               serviceName={tServices(`${r.serviceType}.name`)}
+              token={token}
               onApply={apply}
               onAsk={(id, action) => setAsking({ id, action })}
               onCancelAsk={() => setAsking(null)}
+              onChanged={onChanged}
+              onExpired={onExpired}
             />
               ))}
             </ul>
